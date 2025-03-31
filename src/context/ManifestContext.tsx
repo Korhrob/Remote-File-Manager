@@ -51,10 +51,11 @@ const ManifestEditor: React.FC<ManifestEditorProps> = ({ refreshKey, onError }) 
   return (
     <div>
       <h1>Manifest File Editor</h1>
+      <p>manifest.txt</p>
       {!isEditing ? (
         <div>
           <pre>{manifestContent}</pre>
-          <button onClick={() => setIsEditing(true)}>Edit Manifest</button>
+          <button onClick={() => setIsEditing(true)}>Edit</button>
         </div>
       ) : (
         <div>
@@ -65,7 +66,7 @@ const ManifestEditor: React.FC<ManifestEditorProps> = ({ refreshKey, onError }) 
             cols={50}
           />
           <br />
-          <button onClick={handleSave}>Save Changes</button>
+          <button onClick={handleSave}>Save</button>
           <button onClick={() => setIsEditing(false)}>Cancel</button>
         </div>
       )}

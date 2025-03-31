@@ -17,6 +17,7 @@ const FilesPage = () => {
     const [loading, setLoading] = useState<boolean>(true);
     const [refreshKey, setRefreshKey] = useState(0);
     const fileInputRef = useRef<HTMLInputElement | null>(null); // Reference to the file input
+    const filePath = "/var/www/html/patches"
 
     // Fetch list of files from the API
     useEffect(() => {
@@ -167,6 +168,7 @@ const FilesPage = () => {
             {session ? (
             <>
             <h1>Patch Files</h1>
+            <p>{filePath}</p>
             
             {/* List files */}
             <ul className="file-list">

@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
+  --background: #171717
   --foreground: #171717;
 }
 
@@ -15,7 +15,7 @@
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;
-    --foreground: #ededed;
+    --foreground: #cccccc;
   }
 }
 
@@ -30,8 +30,8 @@ body {
   font-family: Arial, sans-serif;
   margin: 0;
   padding: 0;
-  background-color: #f4f4f4;
-  color: #333;
+  background-color: #0b0b0b;
+  color: #cccccc;
 }
 
 h1 {
@@ -93,7 +93,7 @@ button:disabled {
   justify-content: space-between;
   align-items: center; /* Ensures vertical alignment */
   padding: 8px 12px;
-  border-bottom: 1px solid #ddd;
+  border-bottom: 1px solid #222222;
   min-height: 16px; /* Ensures a consistent row height */
 }
 
@@ -162,7 +162,7 @@ button:disabled {
 }
 
 .untracked {
-  color: blue;
+  color: rgb(51, 123, 255);
 }
 
 .login-form {
@@ -174,7 +174,7 @@ button:disabled {
   max-width: 400px;        /* Set a max width for the form */
   margin: 32px auto;          /* Center the form horizontally */
   padding: 16px;           /* Add padding inside the form */
-  background-color: #f9f9f9; /* Background color for the form */
+  background-color: #222222; /* Background color for the form */
   border-radius: 8px;      /* Rounded corners for the form */
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Add a subtle shadow */
 }
@@ -183,6 +183,12 @@ button:disabled {
   width: 100%;             /* Make the input fields span the full width */
   padding: 8px 12px;       /* Add padding inside the input fields */
   margin: 0;               /* Remove any default margin */
-  border: 1px solid #ddd;  /* Add a border */
+  background-color: #111111;
+  border: 1px solid #000000;  /* Add a border */
   border-radius: 4px;      /* Rounded corners for input fields */
+}
+
+textarea {
+  width: 100%;
+  border: 1px solid #222222;
 }
