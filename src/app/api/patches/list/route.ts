@@ -1,19 +1,17 @@
 import { NextResponse } from "next/server";
 import fs from "fs/promises";
+import { manifestPath, patchesPath } from '@/config/const';
 import path from "path";
-
-const PATCH_STORAGE_PATH = process.env.PATCH_STORAGE_PATH || "/var/www/html/patches";
-const MANIFEST_PATH = process.env.PATCH_MANIFEST_PATH || "/var/www/html/manifest.txt";
 
 export async function GET() {
     try {
         // Read all files in the patches directory
-        const files = await fs.readdir(PATCH_STORAGE_PATH);
+        const files = await fs.readdir(patchesPath);
         
         // Read manifest file (if it exists)
         let manifestEntries: string[] = [];
         try {
-            const manifestContent = await fs.readFile(MANIFEST_PATH, "utf-8");
+            const manifestContent = await fs.readFile(manifestPath, "utf-8");
             manifestEntries = manifestContent.split("\n")
                 .map(line => line.trim().split(" ")[1]) // Extract filename (skip index)
                 .filter(Boolean); // Remove empty lines

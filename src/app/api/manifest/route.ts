@@ -1,11 +1,10 @@
 // src/app/api/manifest/route.ts
 
 import { NextResponse } from 'next/server';
+import { manifestPath } from '@/config/const';
 import fs from 'fs';
-import path from 'path';
 
 export async function GET() {
-  const manifestPath = path.join('/var/www/html', 'manifest.txt');
 
   try {
     // Read the manifest file
@@ -22,8 +21,6 @@ export async function GET() {
 // src/app/api/manifest/route.ts
 
 export async function PATCH(request: Request) {
-	const manifestPath = path.join('/var/www/html', 'manifest.txt');
-  
 	try {
 	  // Get the updated content from the request body
 	  const { content } = await request.json();

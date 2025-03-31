@@ -4,7 +4,7 @@ import React from "react";
 import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { useMessage } from '../context/MessageContext'; // Make sure this path is correct
+import { useMessage } from '../../context/MessageContext'; // Make sure this path is correct
 
 const Home = () => {
   const [username, setUsername] = useState("");

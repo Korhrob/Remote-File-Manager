@@ -191,4 +191,5 @@ button:disabled {
 textarea {
   width: 100%;
   border: 1px solid #222222;
+  padding: 4px;
 }

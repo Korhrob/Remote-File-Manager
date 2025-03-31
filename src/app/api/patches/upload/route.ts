@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { patchesPath } from '@/config/const';
 import fs from 'fs/promises';
 import path from 'path';
 
-const PATCHES_DIR = "/var/www/html/patches"
 const MAX_FOLDER_SIZE = 1024 * 1024 * 1024; // 1GB folder limit
 const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB per file limit
 
@@ -43,7 +43,7 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: "File size exceeds the 30MB limit" }, { status: 400 });
         }
 
-        const currentFolderSize = await getFolderSize(PATCHES_DIR);
+        const currentFolderSize = await getFolderSize(patchesPath);
         if (currentFolderSize + file.size > MAX_FOLDER_SIZE) {
             return NextResponse.json({ error: "Patch folder is too full. Cannot upload more files." }, { status: 400 });
         }

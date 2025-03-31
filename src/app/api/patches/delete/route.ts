@@ -1,7 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-
-const PATCHES_DIR = '/var/www/html/patches'; // Path to your patches directory
+import { patchesPath } from '@/config/const';
 
 export async function DELETE(req: Request) {
     const url = new URL(req.url);
@@ -13,7 +12,7 @@ export async function DELETE(req: Request) {
         });
     }
 
-    const filePath = path.join(PATCHES_DIR, filename);
+    const filePath = path.join(patchesPath, filename);
 
     // Check if the file exists
     if (!fs.existsSync(filePath)) {

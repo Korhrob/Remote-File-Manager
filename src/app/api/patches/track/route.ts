@@ -1,11 +1,10 @@
 // src/app/api/patches/track/route.ts
 
 import { NextResponse } from 'next/server';
+import { manifestPath } from '@/config/const';
 import fs from 'fs';
-import path from 'path';
 
 export async function POST(request: Request) {
-  const manifestPath = path.join('/var/www/html', 'manifest.txt');
   
   try {
     const { filename } = await request.json();

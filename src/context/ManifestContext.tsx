@@ -1,5 +1,6 @@
 'use client';
 
+import { manifestPath } from '@/config/const';
 import { useEffect, useState } from 'react';
 
 interface ManifestEditorProps {
@@ -51,7 +52,7 @@ const ManifestEditor: React.FC<ManifestEditorProps> = ({ refreshKey, onError }) 
   return (
     <div>
       <h1>Manifest File Editor</h1>
-      <p>manifest.txt</p>
+      <p>{manifestPath}</p>
       {!isEditing ? (
         <div>
           <pre>{manifestContent}</pre>
