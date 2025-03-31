@@ -22,7 +22,7 @@ const Home = () => {
     });
 
     if (result?.error) {
-      setError("Invalid username or password");
+      showMessage("Invalid username or password", "error");
     } else {
       router.push("/files"); // Redirect on success
     }
@@ -31,14 +31,15 @@ const Home = () => {
   return (
     <div>
       <h1>Login</h1>
-      {error && <p style={{ color: "red" }}>{error}</p>}
-      <form onSubmit={handleLogin}>
+      <form onSubmit={handleLogin} className="login-form">
+        <label htmlFor="username">Username</label>
         <input
           type="text"
           placeholder="Username"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
         />
+        <label htmlFor="password">Password</label>
         <input
           type="password"
           placeholder="Password"

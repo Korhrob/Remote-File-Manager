@@ -164,3 +164,25 @@ button:disabled {
 .untracked {
   color: blue;
 }
+
+.login-form {
+  display: flex;           /* Enable flexbox */
+  flex-direction: column;  /* Stack children vertically */
+  align-items: flex-start; /* Align items to the start of the container */
+  gap: 16px;               /* Add space between elements */
+  width: 100%;
+  max-width: 400px;        /* Set a max width for the form */
+  margin: 32px auto;          /* Center the form horizontally */
+  padding: 16px;           /* Add padding inside the form */
+  background-color: #f9f9f9; /* Background color for the form */
+  border-radius: 8px;      /* Rounded corners for the form */
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Add a subtle shadow */
+}
+
+.login-form input {
+  width: 100%;             /* Make the input fields span the full width */
+  padding: 8px 12px;       /* Add padding inside the input fields */
+  margin: 0;               /* Remove any default margin */
+  border: 1px solid #ddd;  /* Add a border */
+  border-radius: 4px;      /* Rounded corners for input fields */
+}
