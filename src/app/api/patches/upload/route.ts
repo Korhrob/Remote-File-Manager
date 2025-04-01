@@ -55,7 +55,7 @@ export async function POST(req: NextRequest) {
         console.log("Buffer size:", buffer.length);
 
         // Define file path
-        const filePath = path.join('/var/www/html/patches', file.name);
+        const filePath = path.join(patchesPath, file.name);
         console.log("Saving file to:", filePath);
 
         // Write file to server
