@@ -1,4 +1,5 @@
 // context/MessageContext.tsx
+'use client';
 
 import React, { createContext, useContext } from "react";
 
