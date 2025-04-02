@@ -133,11 +133,11 @@ const FilesPage = () => {
             return;
         }
 
-        const maxSize = 100 * 1024 * 1024; // 30MB limit
-        if (file.size > maxSize) {
-            showMessage("File is too large. Maximum allowed size is 30MB.", "error");
-            return;
-        }
+        // const maxSize = 100 * 1024 * 1024; // 30MB limit
+        // if (file.size > maxSize) {
+        //     showMessage("File is too large. Maximum allowed size is 30MB.", "error");
+        //     return;
+        // }
 
         const formData = new FormData();
         formData.append("patch", file);
