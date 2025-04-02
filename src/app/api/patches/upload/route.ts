@@ -4,7 +4,7 @@ import fs from 'fs/promises';
 import path from 'path';
 
 const MAX_FOLDER_SIZE = 1024 * 1024 * 1024; // 1GB folder limit
-const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB per file limit
+const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB per file limit
 
 // Function to calculate total folder size
 async function getFolderSize(folderPath: string): Promise<number> {
