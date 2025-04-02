@@ -4,8 +4,8 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useRef } from "react";
 import { patchesPath } from "@/config/const";
-import { useMessage } from '../../context/MessageContext'; // Make sure this path is correct
-import ManifestEditor from '../../context/ManifestContext'; // Adjust path if needed
+import { useMessage } from '@/context/MessageContext'; // Make sure this path is correct
+import ManifestEditor from '@/context/ManifestContext'; // Adjust path if needed
 
 const FilesPage = () => {
 
@@ -133,7 +133,7 @@ const FilesPage = () => {
             return;
         }
 
-        const maxSize = 30 * 1024 * 1024; // 30MB limit
+        const maxSize = 100 * 1024 * 1024; // 30MB limit
         if (file.size > maxSize) {
             showMessage("File is too large. Maximum allowed size is 30MB.", "error");
             return;

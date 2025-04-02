@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { patchesPath } from '@/config/const';
+import { useMessage } from '@/context/MessageContext'; 
 import fs from 'fs/promises';
 import path from 'path';
 
@@ -22,7 +23,12 @@ async function getFolderSize(folderPath: string): Promise<number> {
 }
 
 export async function POST(req: NextRequest) {
+
+    const { showMessage } = useMessage(); // Access the context here
+
     try {
+
+        showMessage("Uploading...", 'success');
         // Debug: Log the request method
         console.log("Received upload request");
 
@@ -67,3 +73,5 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: "Error uploading file" }, { status: 500 });
     }
 }
+
+  
