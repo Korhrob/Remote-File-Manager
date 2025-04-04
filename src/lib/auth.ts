@@ -25,7 +25,7 @@ export const authOptions: NextAuthOptions = {
     })
   ],
   pages: {
-    signIn: "/", // Optional: Custom login page
+    signIn: "/login", // Optional: Custom login page
   },
   session: {
     strategy: "jwt",

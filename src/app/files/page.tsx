@@ -18,11 +18,12 @@ const FilesPage = () => {
     const [loading, setLoading] = useState<boolean>(true);
     const [refreshKey, setRefreshKey] = useState(0);
     const fileInputRef = useRef<HTMLInputElement | null>(null); // Reference to the file input
+    const [uploadProgress, setUploadProgress] = useState(0);
 
     // Fetch list of files from the API
     useEffect(() => {
         if (status === "unauthenticated") {
-            router.push("/"); // Redirect to the login page if the user is not authenticated
+            router.push("/login"); // Redirect to the login page if the user is not authenticated
         }
         const fetchFiles = async () => {
             try {
@@ -142,22 +143,61 @@ const FilesPage = () => {
         const formData = new FormData();
         formData.append("patch", file);
 
-        try {
-            const res = await fetch("/api/patches/upload", {
-                method: "POST",
-                body: formData,
-            });
+        const res = await fetch(`/api/patches/upload?filename=${encodeURIComponent(file.name)}`);
+        const uploadData = await res.json();
+        if (uploadData.exists) {
+            showMessage(`Error: File already exists`, "error");
+            return;
+        }
 
-            const data = await res.json();
-            if (res.ok) {
-                setUntrackedFiles((prevFiles) => [...prevFiles, file.name]);
-                showMessage(`File uploaded successfully: ${file.name}`, "success");
-            } else {
-                showMessage(`Error: ${data.error}`, "error");
-            }
+        try {
+            const xhr = new XMLHttpRequest();
+    
+            xhr.upload.onprogress = (event) => {
+                if (event.lengthComputable) {
+                    const percentComplete = Math.round((event.loaded / event.total) * 100);
+                    setUploadProgress(percentComplete);
+                }
+            };
+    
+            xhr.onload = () => {
+                if (xhr.status === 200) {
+                    showMessage(`File uploaded successfully: ${file.name}`, "success");
+                    setUntrackedFiles((prevFiles) => [...prevFiles, file.name]);
+                    setUploadProgress(0); // Reset progress after upload
+                } else {
+                    showMessage(`Error: ${JSON.parse(xhr.response).error}`, "error");
+                }
+            };
+    
+            xhr.onerror = () => {
+                showMessage(`Error: ${JSON.parse(xhr.response).error}`, "error");
+            };
+    
+            xhr.open("POST", "/api/patches/upload", true);
+            xhr.send(formData);
         } catch (error) {
             showMessage("An error occurred during file upload.", "error");
+        } finally {
+            setUploadProgress(0);
         }
+
+        // try {
+        //     const res = await fetch("/api/patches/upload", {
+        //         method: "POST",
+        //         body: formData,
+        //     });
+
+        //     const data = await res.json();
+        //     if (res.ok) {
+        //         setUntrackedFiles((prevFiles) => [...prevFiles, file.name]);
+        //         showMessage(`File uploaded successfully: ${file.name}`, "success");
+        //     } else {
+        //         showMessage(`Error: ${data.error}`, "error");
+        //     }
+        // } catch (error) {
+        //     showMessage("An error occurred during file upload.", "error");
+        // }
     };
 
     return (
@@ -192,18 +232,23 @@ const FilesPage = () => {
                     </li>
                 ))}
             </ul>
-    
-            <div style={{ textAlign: "center", marginTop: "30px" }}>
-                {/* Trigger file input when the button is clicked */}
-                <button onClick={triggerFileInput}>Upload New File</button>
-                {/* Hidden file input */}
-                <input
-                type="file"
-                ref={fileInputRef} // Attach the ref here
-                onChange={handleFileChange}
-                className="upload-input"  // Use the same class for styling
-                />
-            </div>
+
+
+            {uploadProgress > 0 ? 
+                <p>Uploading: {uploadProgress}%</p> 
+                : 
+                <div style={{ textAlign: "center", marginTop: "30px" }}>
+                    {/* Trigger file input when the button is clicked */}
+                    <button onClick={triggerFileInput}>Upload New File</button>
+                    {/* Hidden file input */}
+                    <input
+                    type="file"
+                    ref={fileInputRef} // Attach the ref here
+                    onChange={handleFileChange}
+                    className="upload-input"  // Use the same class for styling
+                    />
+                </div>
+            }
 
             <ManifestEditor refreshKey={refreshKey} onError={showMessage}/>
 
