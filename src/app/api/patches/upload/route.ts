@@ -72,7 +72,7 @@ export async function POST(req: NextRequest) {
 
         if (file.size > MAX_FILE_SIZE) {
             console.error("File is too large!");
-            return NextResponse.json({ error: "File size exceeds the ${MAX_FILE_SIZE / (1024 * 1024)}MB limit" }, { status: 400 });
+            return NextResponse.json({ error: `File size exceeds the ${MAX_FILE_SIZE / (1024 * 1024)}MB limit` }, { status: 400 });
         }
 
         // const currentFolderSize = await getFolderSize(patchesPath);
@@ -84,56 +84,40 @@ export async function POST(req: NextRequest) {
         const fileStream = fs.createWriteStream(filePath);
         const reader = file.stream().getReader();
 
-        // return await new Promise<Response>((resolve, reject) => {
-        //     fileStream.on("error", (err) => {
-        //         console.error("Stream error:", err);
-        //         reject(
-        //             NextResponse.json({ error: "Failed to write file" }, { status: 500 })
-        //         );
-        //     });
+        return await new Promise<Response>((resolve, reject) => {
+            fileStream.on("error", (err) => {
+                console.error("Stream error:", err);
+                reject(
+                    NextResponse.json({ error: "Failed to write file" }, { status: 500 })
+                );
+            });
 
-        //     fileStream.on("finish", () => {
-        //         console.log("File stream finished");
-        //         resolve(
-        //             NextResponse.json({ message: "File uploaded successfully" }, { status: 200 })
-        //         );
-        //     });
+            fileStream.on("finish", () => {
+                console.log("File stream finished");
+                resolve(
+                    NextResponse.json({ message: "File uploaded successfully" }, { status: 200 })
+                );
+            });
 
-        //     async function pump() {
-        //         try {
-        //             const { done, value } = await reader.read();
-        //             if (done) {
-        //                 fileStream.end(); // triggers "finish"
-        //                 return;
-        //             }
-        //             if (value) {
-        //                 fileStream.write(Buffer.from(value), pump);
-        //             }
-        //         } catch (err) {
-        //             reject(
-        //                 NextResponse.json({ error: "Error while reading file stream" }, { status: 500 })
-        //             );
-        //         }
-        //     }
+            async function pump() {
+                try {
+                    const { done, value } = await reader.read();
+                    if (done) {
+                        fileStream.end(); // triggers "finish"
+                        return;
+                    }
+                    if (value) {
+                        fileStream.write(Buffer.from(value));
+                    }
+                } catch (err) {
+                    reject(
+                        NextResponse.json({ error: "Error while reading file stream" }, { status: 500 })
+                    );
+                }
+            }
 
-        //     pump();
-        // });
-
-        // Helper to read and write file chunks
-        async function writeStream() {
-          const { done, value } = await reader.read();
-          if (done) {
-            // When done, finalize the file write
-            fileStream.end();
-            return NextResponse.json({ message: "File uploaded successfully" }, { status: 200 });
-          }
-          fileStream.write(Buffer.from(value));
-          return writeStream(); // Recursively continue writing chunks
-        }
-    
-        // Start the write process
-        return writeStream();
-        //return NextResponse.json({ message: "File uploaded successfully" }, { status: 200 });
+            pump();
+        });
     } catch (error) {
         console.error("Upload error:", error);
         return NextResponse.json({ error: "Error uploading file" }, { status: 500 });
