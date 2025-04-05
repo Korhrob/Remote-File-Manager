@@ -77,18 +77,35 @@ export async function POST(req: NextRequest) {
         const fileStream = fs.createWriteStream(filePath);
         const reader = file.stream().getReader();
 
-        async function write() {
-            const { done, value } = await reader.read();
-            if (done) {
-                fileStream.end();
-                return NextResponse.json({ message: "File uploaded successfully" }, { status: 200 });
+        return new Promise(async (resolve, reject) => {
+            function handleError(error: any) {
+                console.error("Stream error:", error);
+                fileStream.destroy();
+                reject(NextResponse.json({ error: "Failed to write file" }, { status: 500 }));
             }
-            fileStream.write(Buffer.from(value));
-            return write(); // Continue writing until done
-        }
 
-        return write();
+            fileStream.on("error", handleError);
 
+            async function writeChunk() {
+                try {
+                    const { done, value } = await reader.read();
+                    if (done) {
+                        fileStream.end(() => {
+                            console.log("File stream ended");
+                            resolve(NextResponse.json({ message: "File uploaded successfully" }, { status: 200 }));
+                        });
+                        return;
+                    }
+                    if (value) {
+                        fileStream.write(Buffer.from(value), writeChunk);
+                    }
+                } catch (error) {
+                    handleError(error);
+                }
+            }
+
+            writeChunk(); // start writing
+        });
 
         // Read file content
         //const buffer = Buffer.from(await file.arrayBuffer());
