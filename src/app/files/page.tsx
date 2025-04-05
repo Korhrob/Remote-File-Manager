@@ -134,9 +134,6 @@ const FilesPage = () => {
             return;
         }
 
-        const formData = new FormData();
-        formData.append("patch", file);
-
         const res = await fetch(`/api/patches/upload?filename=${encodeURIComponent(file.name)}`);
         const uploadData = await res.json();
         if (uploadData.exists) {
@@ -155,32 +152,28 @@ const FilesPage = () => {
             };
     
             xhr.onload = () => {
-                try {
-                    const response = JSON.parse(xhr.response);
-                    if (xhr.status === 200) {
-                        // showMessage(`File uploaded successfully: ${file.name}`, "success");
-                        // setUntrackedFiles((prevFiles) => [...prevFiles, file.name]);
-                        // setUploadProgress(0);
-                    } else {
-                        showMessage(`Error: ${response.error}`, "error");
-                    }
-                } catch (e) {
-                    showMessage(`Error: ${xhr.response}`, "error");
+                console.log("onload trigger");
+                const response = JSON.parse(xhr.response);
+                if (xhr.status === 200) {
+                    showMessage(`File uploaded successfully: ${file.name}`, "success");
+                    setUntrackedFiles((prevFiles) => [...prevFiles, file.name]);
+                    setUploadProgress(0); // Reset progress
+                } else {
+                    console.error(`Something wrong: ${response.error}, ${response.status}`);
+                    showMessage(`Error: ${response.error}`, "error");
                 }
-            };            
+            };
     
             xhr.onerror = () => {
                 showMessage(`Error: ${JSON.parse(xhr.response).error}`, "error");
             };
-    
+
+            const formData = new FormData();
+            formData.append("patch", file);
             xhr.open("POST", "/api/patches/upload", true);
             xhr.send(formData);
         } catch (error) {
             showMessage("An error occurred during file upload.", "error");
-        } finally {
-            showMessage(`File uploaded successfully: ${file.name}`, "success");
-            setUntrackedFiles((prevFiles) => [...prevFiles, file.name]);
-            setUploadProgress(0);
         }
 
         // try {

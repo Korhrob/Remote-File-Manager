@@ -50,9 +50,7 @@ export async function GET(req: NextRequest) {
     }
 }
 
-export async function POST(req: NextRequest) {
-
-    // const { showMessage } = useMessage(); // Access the context here
+export async function POST(req: NextRequest, res: NextResponse) {
 
     try {
 
@@ -82,43 +80,25 @@ export async function POST(req: NextRequest) {
         // }
 
         const filePath = path.join(patchesPath, file.name);
-        const fileStream = fs.createWriteStream(filePath);
-        const reader = file.stream().getReader();
 
-        return await new Promise<Response>((resolve, reject) => {
-            fileStream.on("error", (err) => {
-                console.error("Stream error:", err);
-                reject(
-                    NextResponse.json({ error: "Failed to write file" }, { status: 500 })
-                );
-            });
+        try {
+            await fs.promises.access(filePath, fs.constants.F_OK); // Check if file exists
+            return NextResponse.json({ error: "File with this name already exists." }, { status: 400 });
+        } catch (err: any) {
 
-            fileStream.on("finish", () => {
-                console.log("File stream finished");
-                resolve(
-                    NextResponse.json({ message: "File uploaded successfully" }, { status: 200 })
-                );
-            });
+        }
 
-            async function pump() {
-                try {
-                    const { done, value } = await reader.read();
-                    if (done) {
-                        fileStream.end(); // triggers "finish"
-                        return;
-                    }
-                    if (value) {
-                        fileStream.write(Buffer.from(value));
-                    }
-                } catch (err) {
-                    reject(
-                        NextResponse.json({ error: "Error while reading file stream" }, { status: 500 })
-                    );
-                }
-            }
+        try {
+            // Save the file to the server
+            const buffer = Buffer.from(await file.arrayBuffer());
+            await fs.promises.writeFile(filePath, buffer);
 
-            pump();
-        });
+            return NextResponse.json({ message: "File uploaded successfully" }, { status: 200 });
+        } catch (error) {
+            console.error("Error uploading file:", error);
+            return NextResponse.json({ error: "Error uploading file" }, { status: 500 });
+        }
+
     } catch (error) {
         console.error("Upload error:", error);
         return NextResponse.json({ error: "Error uploading file" }, { status: 500 });
