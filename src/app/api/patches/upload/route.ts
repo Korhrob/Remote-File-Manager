@@ -77,34 +77,39 @@ export async function POST(req: NextRequest) {
         const fileStream = fs.createWriteStream(filePath);
         const reader = file.stream().getReader();
 
-        return new Promise(async (resolve, reject) => {
-            function handleError(error: any) {
-                console.error("Stream error:", error);
-                fileStream.destroy();
-                reject(NextResponse.json({ error: "Failed to write file" }, { status: 500 }));
-            }
+        return await new Promise<Response>((resolve, reject) => {
+            fileStream.on("error", (err) => {
+                console.error("Stream error:", err);
+                reject(
+                    NextResponse.json({ error: "Failed to write file" }, { status: 500 })
+                );
+            });
 
-            fileStream.on("error", handleError);
+            fileStream.on("finish", () => {
+                console.log("File stream finished");
+                resolve(
+                    NextResponse.json({ message: "File uploaded successfully" }, { status: 200 })
+                );
+            });
 
-            async function writeChunk() {
+            async function pump() {
                 try {
                     const { done, value } = await reader.read();
                     if (done) {
-                        fileStream.end(() => {
-                            console.log("File stream ended");
-                            resolve(NextResponse.json({ message: "File uploaded successfully" }, { status: 200 }));
-                        });
+                        fileStream.end(); // triggers "finish"
                         return;
                     }
                     if (value) {
-                        fileStream.write(Buffer.from(value), writeChunk);
+                        fileStream.write(Buffer.from(value), pump);
                     }
-                } catch (error) {
-                    handleError(error);
+                } catch (err) {
+                    reject(
+                        NextResponse.json({ error: "Error while reading file stream" }, { status: 500 })
+                    );
                 }
             }
 
-            writeChunk(); // start writing
+            pump();
         });
 
         // Read file content
