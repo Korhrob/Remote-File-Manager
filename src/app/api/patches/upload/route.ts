@@ -25,10 +25,11 @@ const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB per file limit
 
 export const config = {
     api: {
-      bodyParser: false,
+      bodyParser: {
+        sizeLimit: '100mb', // Set the body size limit to 100MB for this route
+      },
     },
   };
-  
 
 export async function GET(req: NextRequest) {
     const { searchParams } = req.nextUrl;
