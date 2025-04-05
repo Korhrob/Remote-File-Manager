@@ -158,9 +158,9 @@ const FilesPage = () => {
                 try {
                     const response = JSON.parse(xhr.response);
                     if (xhr.status === 200) {
-                        showMessage(`File uploaded successfully: ${file.name}`, "success");
-                        setUntrackedFiles((prevFiles) => [...prevFiles, file.name]);
-                        setUploadProgress(0);
+                        // showMessage(`File uploaded successfully: ${file.name}`, "success");
+                        // setUntrackedFiles((prevFiles) => [...prevFiles, file.name]);
+                        // setUploadProgress(0);
                     } else {
                         showMessage(`Error: ${response.error}`, "error");
                     }
@@ -178,6 +178,8 @@ const FilesPage = () => {
         } catch (error) {
             showMessage("An error occurred during file upload.", "error");
         } finally {
+            showMessage(`File uploaded successfully: ${file.name}`, "success");
+            setUntrackedFiles((prevFiles) => [...prevFiles, file.name]);
             setUploadProgress(0);
         }
 
