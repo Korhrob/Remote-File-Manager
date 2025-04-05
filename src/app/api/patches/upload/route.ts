@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { patchesPath } from '@/config/const';
 // import { useMessage } from '@/context/MessageContext'; 
 //import fs from 'fs/promises';
-import fs, { exists } from 'fs';
+import fs, { exists, writeFile } from 'fs';
 import path from 'path';
 
 const MAX_FOLDER_SIZE = 1024 * 1024 * 1024; // 1GB folder limit
@@ -22,6 +22,13 @@ const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB per file limit
 //     }
 //     return totalSize;
 // }
+
+export const config = {
+    api: {
+      bodyParser: false,
+    },
+  };
+  
 
 export async function GET(req: NextRequest) {
     const { searchParams } = req.nextUrl;
@@ -77,54 +84,55 @@ export async function POST(req: NextRequest) {
         const fileStream = fs.createWriteStream(filePath);
         const reader = file.stream().getReader();
 
-        return await new Promise<Response>((resolve, reject) => {
-            fileStream.on("error", (err) => {
-                console.error("Stream error:", err);
-                reject(
-                    NextResponse.json({ error: "Failed to write file" }, { status: 500 })
-                );
-            });
+        // return await new Promise<Response>((resolve, reject) => {
+        //     fileStream.on("error", (err) => {
+        //         console.error("Stream error:", err);
+        //         reject(
+        //             NextResponse.json({ error: "Failed to write file" }, { status: 500 })
+        //         );
+        //     });
 
-            fileStream.on("finish", () => {
-                console.log("File stream finished");
-                resolve(
-                    NextResponse.json({ message: "File uploaded successfully" }, { status: 200 })
-                );
-            });
+        //     fileStream.on("finish", () => {
+        //         console.log("File stream finished");
+        //         resolve(
+        //             NextResponse.json({ message: "File uploaded successfully" }, { status: 200 })
+        //         );
+        //     });
 
-            async function pump() {
-                try {
-                    const { done, value } = await reader.read();
-                    if (done) {
-                        fileStream.end(); // triggers "finish"
-                        return;
-                    }
-                    if (value) {
-                        fileStream.write(Buffer.from(value), pump);
-                    }
-                } catch (err) {
-                    reject(
-                        NextResponse.json({ error: "Error while reading file stream" }, { status: 500 })
-                    );
-                }
-            }
+        //     async function pump() {
+        //         try {
+        //             const { done, value } = await reader.read();
+        //             if (done) {
+        //                 fileStream.end(); // triggers "finish"
+        //                 return;
+        //             }
+        //             if (value) {
+        //                 fileStream.write(Buffer.from(value), pump);
+        //             }
+        //         } catch (err) {
+        //             reject(
+        //                 NextResponse.json({ error: "Error while reading file stream" }, { status: 500 })
+        //             );
+        //         }
+        //     }
 
-            pump();
-        });
+        //     pump();
+        // });
 
-        // Read file content
-        //const buffer = Buffer.from(await file.arrayBuffer());
-
-        // Debug: Log file buffer size
-        //console.log("Buffer size:", buffer.length);
-
-        // Define file path
-        //const filePath = path.join(patchesPath, file.name);
-        //console.log("Saving file to:", filePath);
-
-        // Write file to server
-        //await fs.writeFile(filePath, buffer);
-
+        // Helper to read and write file chunks
+        async function writeStream() {
+          const { done, value } = await reader.read();
+          if (done) {
+            // When done, finalize the file write
+            fileStream.end();
+            return NextResponse.json({ message: "File uploaded successfully" }, { status: 200 });
+          }
+          fileStream.write(Buffer.from(value));
+          return writeStream(); // Recursively continue writing chunks
+        }
+    
+        // Start the write process
+        return writeStream();
         //return NextResponse.json({ message: "File uploaded successfully" }, { status: 200 });
     } catch (error) {
         console.error("Upload error:", error);

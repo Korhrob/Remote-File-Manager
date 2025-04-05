@@ -134,12 +134,6 @@ const FilesPage = () => {
             return;
         }
 
-        // const maxSize = 100 * 1024 * 1024; // 30MB limit
-        // if (file.size > maxSize) {
-        //     showMessage("File is too large. Maximum allowed size is 30MB.", "error");
-        //     return;
-        // }
-
         const formData = new FormData();
         formData.append("patch", file);
 
@@ -150,37 +144,43 @@ const FilesPage = () => {
             return;
         }
 
-        try {
-            const xhr = new XMLHttpRequest();
+        // debug
+        await fetch("/api/patches/upload", {
+            method: "POST",
+            body: formData,
+        });
+
+        // try {
+        //     const xhr = new XMLHttpRequest();
     
-            xhr.upload.onprogress = (event) => {
-                if (event.lengthComputable) {
-                    const percentComplete = Math.round((event.loaded / event.total) * 100);
-                    setUploadProgress(percentComplete);
-                }
-            };
+        //     xhr.upload.onprogress = (event) => {
+        //         if (event.lengthComputable) {
+        //             const percentComplete = Math.round((event.loaded / event.total) * 100);
+        //             setUploadProgress(percentComplete);
+        //         }
+        //     };
     
-            xhr.onload = () => {
-                if (xhr.status === 200) {
-                    showMessage(`File uploaded successfully: ${file.name}`, "success");
-                    setUntrackedFiles((prevFiles) => [...prevFiles, file.name]);
-                    setUploadProgress(0); // Reset progress after upload
-                } else {
-                    showMessage(`Error: ${JSON.parse(xhr.response).error}`, "error");
-                }
-            };
+        //     xhr.onload = () => {
+        //         if (xhr.status === 200) {
+        //             showMessage(`File uploaded successfully: ${file.name}`, "success");
+        //             setUntrackedFiles((prevFiles) => [...prevFiles, file.name]);
+        //             setUploadProgress(0); // Reset progress after upload
+        //         } else {
+        //             showMessage(`Error: ${JSON.parse(xhr.response).error}`, "error");
+        //         }
+        //     };
     
-            xhr.onerror = () => {
-                showMessage(`Error: ${JSON.parse(xhr.response).error}`, "error");
-            };
+        //     xhr.onerror = () => {
+        //         showMessage(`Error: ${JSON.parse(xhr.response).error}`, "error");
+        //     };
     
-            xhr.open("POST", "/api/patches/upload", true);
-            xhr.send(formData);
-        } catch (error) {
-            showMessage("An error occurred during file upload.", "error");
-        } finally {
-            setUploadProgress(0);
-        }
+        //     xhr.open("POST", "/api/patches/upload", true);
+        //     xhr.send(formData);
+        // } catch (error) {
+        //     showMessage("An error occurred during file upload.", "error");
+        // } finally {
+        //     setUploadProgress(0);
+        // }
 
         // try {
         //     const res = await fetch("/api/patches/upload", {
