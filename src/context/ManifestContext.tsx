@@ -12,7 +12,6 @@ const ManifestEditor: React.FC<ManifestEditorProps> = ({ refreshKey, onError }) 
   const [manifestContent, setManifestContent] = useState('');
   const [isEditing, setIsEditing] = useState(false);
   const [newContent, setNewContent] = useState('');
-  const [message, setMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
   // Fetch the current manifest file content when the component mounts
@@ -84,7 +83,6 @@ const ManifestEditor: React.FC<ManifestEditorProps> = ({ refreshKey, onError }) 
           <button onClick={() => setIsEditing(false)}>Cancel</button>
         </div>
       )}
-	  {message && <div>{message}</div>}
     </div>
   );
 };

@@ -9,7 +9,7 @@ import FileManager from '@/context/FileListContext';
 
 const FilesPage = () => {
 
-    const { showMessage } = useMessage();
+    const { showError, showSuccess, showNotice } = useMessage();
     const { data: session, status } = useSession();
     const router = useRouter();
     const [refreshKey, setRefreshKey] = useState(0); // Not used
@@ -21,16 +21,16 @@ const FilesPage = () => {
     }, [status, router]);
 
     const updateServer = async () => {
-        showMessage("Fetching and pulling server...", "notice");
+        showNotice("Fetching and pulling server...");
         try {
             const res = await fetch("/api/server/update");
             if (!res.ok) {
                 throw new Error("Failed to update server");
             }
             const data = await res.json();
-            showMessage("Server up to date", "success");
+            showSuccess("Server up to date");
         } catch (error) {
-            showMessage("Could not fetch patch files.", "error");
+            showError("Could not fetch patch files.");
         }
     };
 
@@ -40,9 +40,10 @@ const FilesPage = () => {
 
             {session ? (
             <>
-            <FileManager refreshKey={refreshKey} onError={(msg) => showMessage(msg, "error")} onSuccess={(msg) => showMessage(msg, "success")}/>
-            <ManifestEditor refreshKey={refreshKey} onError={showMessage}/>
+            <FileManager refreshKey={refreshKey} onError={(msg) => showError(msg)} onSuccess={(msg) => showSuccess(msg)}/>
+            <ManifestEditor refreshKey={refreshKey} onError={showError}/>
             <div style={{ textAlign: "center", marginTop: "30px" }}>
+                <p>Server Control</p>
                 <button onClick={updateServer}>Update Server</button>
             </div>
             </>

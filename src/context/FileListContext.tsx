@@ -1,6 +1,7 @@
 'use client';
 
 import { patchesPath, maxFileSize } from '@/config/const';
+//import { useMessage } from '@/context/MessageContext';
 import { useEffect, useState, useRef } from 'react';
 
 interface FileManagerProps {
@@ -9,7 +10,7 @@ interface FileManagerProps {
 	onSuccess: (message: string)  => void;
 }
 
-const FileManager: React.FC<FileManagerProps> = ({ refreshKey, onError, onSuccess}) => {
+const FileManager: React.FC<FileManagerProps> = ({ refreshKey, onError, onSuccess }) => {
 
     const [trackedFiles, setTrackedFiles] = useState<string[]>([]);
     const [untrackedFiles, setUntrackedFiles] = useState<string[]>([]);
