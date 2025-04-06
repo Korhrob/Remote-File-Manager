@@ -19,11 +19,20 @@ const ManifestEditor: React.FC<ManifestEditorProps> = ({ refreshKey, onError }) 
     const fetchManifest = async () => {
       const response = await fetch('/api/manifest');
       const data = await response.json();
+
+      if (response.status == 404)
+      {
+        return onError(`Failed to load manifest.`, "error");
+      }
+
+      if (response.status == 400)
+      {
+        onError("Manifest file is empty", "error");
+      }
+
       if (data.content) {
         setManifestContent(data.content);
         setNewContent(data.content);
-      } else {
-        if (onError) onError('Failed to load manifest.', "error");
       }
     };
     fetchManifest();
@@ -41,11 +50,11 @@ const ManifestEditor: React.FC<ManifestEditorProps> = ({ refreshKey, onError }) 
 
     const data = await response.json();
     if (data.message) {
-      if (onError) onError('Manifest updated successfully.', "success");
+      onError('Manifest updated successfully.', "success");
       setManifestContent(newContent); // Update the displayed content
       setIsEditing(false);
     } else {
-      if (onError) onError('Failed to update manifest.', "error");
+      onError('Failed to update manifest.', "error");
     }
   };
 

@@ -1,4 +1,4 @@
-// src/app/api/patches/track/route.ts
+// src/app/api/file/track/route.ts
 
 import { NextResponse } from 'next/server';
 import { manifestPath } from '@/config/const';

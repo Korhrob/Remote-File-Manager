@@ -4,7 +4,7 @@ import React from "react";
 import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { useMessage } from '../../context/MessageContext'; // Make sure this path is correct
+import { useMessage } from "@/context/MessageContext";
 
 const Home = () => {
   const [username, setUsername] = useState("");
@@ -24,7 +24,7 @@ const Home = () => {
     if (result?.error) {
       showMessage("Invalid username or password", "error");
     } else {
-      router.push("/files"); // Redirect on success
+      router.push("/files");
     }
   };
 
