@@ -5,7 +5,7 @@ import React, { createContext, useContext } from "react";
 
 // Define the type for the context
 interface MessageContextType {
-  showMessage: (msg: string, type: "success" | "error") => void;
+  showMessage: (msg: string, type: "success" | "error" | "notice") => void;
 }
 
 // Create a context with a default value of `null`

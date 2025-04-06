@@ -14,10 +14,12 @@ const FileManager: React.FC<FileManagerProps> = ({ refreshKey, onError, onSucces
     const [trackedFiles, setTrackedFiles] = useState<string[]>([]);
     const [untrackedFiles, setUntrackedFiles] = useState<string[]>([]);
     const [uploadProgress, setUploadProgress] = useState(0);
+    const [loading, setLoading] = useState<boolean>(false);
 	const fileInputRef = useRef<HTMLInputElement | null>(null);
 
     useEffect(() => {
         const fetchFiles = async () => {
+            setLoading(true);
             try {
                 const res = await fetch("/api/file/list");
                 if (!res.ok) {
@@ -29,6 +31,7 @@ const FileManager: React.FC<FileManagerProps> = ({ refreshKey, onError, onSucces
             } catch (error) {
 				onError("Could not fetch patch files.");
             }
+            setLoading(false);
         };
         fetchFiles();
     }, [refreshKey]);
@@ -176,6 +179,8 @@ const FileManager: React.FC<FileManagerProps> = ({ refreshKey, onError, onSucces
 			<p>{patchesPath}</p>
 			
 			<ul className="file-list">
+                {loading && <p>"Loading..."</p> }
+
 				{trackedFiles.map((file) => (
 					<li key={file} className="tracked file-item">
 						<span>{file}</span>

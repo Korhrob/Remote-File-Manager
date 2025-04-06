@@ -24,12 +24,12 @@ interface RootLayoutProps {
 
 const RootLayout = ({ children }: { children: React.ReactNode }) => {
   const [message, setMessage] = useState<string | null>(null);
-  const [messageType, setMessageType] = useState<"success" | "error" | null>(null);
+  const [messageType, setMessageType] = useState<"success" | "error" | "notice" | null>(null);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const hideTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [visible, setVisible] = useState(false);
 
-  const showMessage = (msg: string, type: "success" | "error") => {
+  const showMessage = (msg: string, type: "success" | "error" | "notice") => {
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
     if (hideTimeoutRef.current) clearTimeout(hideTimeoutRef.current);
 
@@ -68,7 +68,9 @@ const RootLayout = ({ children }: { children: React.ReactNode }) => {
                   className={`status-message ${visible ? "show" : ""} ${
                     messageType === "success"
                       ? "status-success"
-                      : "status-error"
+                      : messageType === "error"
+                      ? "status-error"
+                      : "status-notice"
                   }`}
                 >
                   {message}

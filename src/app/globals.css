@@ -161,6 +161,11 @@ button:disabled {
   color: white;
 }
 
+.status-notice {
+  background: #ec971f;
+  color: white;
+}
+
 .untracked {
   color: rgb(51, 123, 255);
 }

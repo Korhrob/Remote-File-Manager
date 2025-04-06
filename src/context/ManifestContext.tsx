@@ -13,10 +13,12 @@ const ManifestEditor: React.FC<ManifestEditorProps> = ({ refreshKey, onError }) 
   const [isEditing, setIsEditing] = useState(false);
   const [newContent, setNewContent] = useState('');
   const [message, setMessage] = useState<string | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
 
   // Fetch the current manifest file content when the component mounts
   useEffect(() => {
     const fetchManifest = async () => {
+      setLoading(true);
       const response = await fetch('/api/manifest');
       const data = await response.json();
 
@@ -34,6 +36,7 @@ const ManifestEditor: React.FC<ManifestEditorProps> = ({ refreshKey, onError }) 
         setManifestContent(data.content);
         setNewContent(data.content);
       }
+      setLoading(false);
     };
     fetchManifest();
   }, [refreshKey]);
@@ -62,6 +65,7 @@ const ManifestEditor: React.FC<ManifestEditorProps> = ({ refreshKey, onError }) 
     <div>
       <h1>Manifest File Editor</h1>
       <p>{manifestPath}</p>
+      {loading && <p>Loading...</p>}
       {!isEditing ? (
         <div>
           <pre>{manifestContent}</pre>
