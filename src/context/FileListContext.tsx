@@ -1,16 +1,16 @@
 'use client';
 
 import { patchesPath, maxFileSize } from '@/config/const';
-//import { useMessage } from '@/context/MessageContext';
 import { useEffect, useState, useRef } from 'react';
+import { MsgContext } from './MessageContext';
 
-interface FileManagerProps {
-	refreshKey: number;
-	onError: (message: string) => void;
-	onSuccess: (message: string)  => void;
-}
+// interface FileManagerProps {
+// 	refreshKey: number;
+// 	onError: (message: string) => void;
+// 	onSuccess: (message: string)  => void;
+// }
 
-const FileManager: React.FC<FileManagerProps> = ({ refreshKey, onError, onSuccess }) => {
+const FileManager: React.FC<MsgContext> = ({ refreshKey, onError, onSuccess }) => {
 
     const [trackedFiles, setTrackedFiles] = useState<string[]>([]);
     const [untrackedFiles, setUntrackedFiles] = useState<string[]>([]);
@@ -27,8 +27,12 @@ const FileManager: React.FC<FileManagerProps> = ({ refreshKey, onError, onSucces
                     throw new Error("Failed to fetch files");
                 }
                 const data = await res.json();
-                setTrackedFiles(data.tracked);
-                setUntrackedFiles(data.untracked); 
+                setTrackedFiles(data.tracked || []);
+                setUntrackedFiles(data.untracked || []); 
+                const allFileItems = document.querySelectorAll('.file-item');
+                allFileItems.forEach(item => {
+                    item.classList.add('show');
+                });
             } catch (error) {
 				onError("Could not fetch patch files.");
             }
@@ -36,6 +40,17 @@ const FileManager: React.FC<FileManagerProps> = ({ refreshKey, onError, onSucces
         };
         fetchFiles();
     }, [refreshKey]);
+
+    const triggerFileClass = (newFiles: string[], prevFiles: string[]) => {
+        setTimeout(() => {
+            newFiles.forEach((file) => {
+                const fileItem = document.querySelector(`.file-item[data-file="${file}"]`);
+                if (fileItem) {
+                    fileItem.classList.add('show');
+                }
+            });
+        }, 50);
+    };
 
     const handleTrack = async (file: string) => {
         try {
@@ -51,6 +66,7 @@ const FileManager: React.FC<FileManagerProps> = ({ refreshKey, onError, onSucces
         if (data.message) {
             setUntrackedFiles((prev) => prev.filter((f) => f !== file));
             setTrackedFiles((prev) => [...prev, file]);
+            //triggerFileClass([...trackedFiles, file], trackedFiles, 'tracked');
             //setRefreshKey(prevKey => prevKey + 1); // Should be used in page
             onSuccess(`File ${file} has been tracked.`);
         } else {
@@ -70,15 +86,24 @@ const FileManager: React.FC<FileManagerProps> = ({ refreshKey, onError, onSucces
         }
 
         try {
+            const fileItem = document.querySelector(`.file-item[data-file="${filename}"]`);
+            if (fileItem) {
+                fileItem.classList.remove('show');
+            }
+
+            
             const res = await fetch(`/api/file/delete?filename=${filename}`, {
                 method: "DELETE",
             });
-
+            
             const data = await res.json();
+
+            
             if (res.ok) {
+                onSuccess(`File deleted successfully: ${filename}`);
+                await new Promise(resolve => setTimeout(resolve, 300));
                 setTrackedFiles((prevFiles) => prevFiles.filter((file) => file !== filename));
                 setUntrackedFiles((prevFiles) => prevFiles.filter((file) => file !== filename));
-                onSuccess(`File deleted successfully: ${filename}`);
             } else {
                 onError(`Error: ${data.error}`);
             }
@@ -133,7 +158,7 @@ const FileManager: React.FC<FileManagerProps> = ({ refreshKey, onError, onSucces
         }
 
 		if (file.size > maxFileSize) {
-			onError(`File size is too large! Maximum allowed size is ${process.env.NEXT_PUBLIC_MAX_UPLOAD_SIZE} MB.`);
+			onError(`File size is too large! Maximum allowed size is ${maxFileSize} MB.`);
 			return;
 		}
 
@@ -153,6 +178,7 @@ const FileManager: React.FC<FileManagerProps> = ({ refreshKey, onError, onSucces
                 if (xhr.status === 200) {
                     onSuccess(`File uploaded successfully: ${file.name}`);
                     setUntrackedFiles((prevFiles) => [...prevFiles, file.name]);
+                    triggerFileClass([file.name], []);
                     setUploadProgress(0);
                 } else {
                     console.error(`Something wrong: ${response.error}, ${response.status}`);
@@ -182,8 +208,8 @@ const FileManager: React.FC<FileManagerProps> = ({ refreshKey, onError, onSucces
 			<ul className="file-list">
                 {loading && <p>"Loading..."</p> }
 
-				{trackedFiles.map((file) => (
-					<li key={file} className="tracked file-item">
+				{trackedFiles && trackedFiles.map((file) => (
+					<li key={file} className="tracked file-item" data-file={file}>
 						<span>{file}</span>
 						<div className="file-actions">
 							<button onClick={() => handleRename(file)}>Rename</button>
@@ -191,8 +217,8 @@ const FileManager: React.FC<FileManagerProps> = ({ refreshKey, onError, onSucces
 						</div>
 					</li>
 				))}
-				{untrackedFiles.map((file) => (
-					<li key={file} className="untracked file-item">
+				{untrackedFiles && untrackedFiles.map((file) => (
+					<li key={file} className="untracked file-item" data-file={file}>
 						<span>{file}</span>
 						<div className="file-actions">
 							<button onClick={() => handleTrack(file)}>Track</button>

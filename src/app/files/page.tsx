@@ -13,6 +13,7 @@ const FilesPage = () => {
     const { data: session, status } = useSession();
     const router = useRouter();
     const [refreshKey, setRefreshKey] = useState(0); // Not used
+    const [updateProgress, setUpdateProgress] = useState<boolean>(false);
 
     useEffect(() => {
         if (status === "unauthenticated") {
@@ -21,6 +22,7 @@ const FilesPage = () => {
     }, [status, router]);
 
     const updateServer = async () => {
+        setUpdateProgress(true);
         showNotice("Fetching and pulling server...");
         try {
             const res = await fetch("/api/server/update");
@@ -32,6 +34,7 @@ const FilesPage = () => {
         } catch (error) {
             showError("Could not fetch patch files.");
         }
+        setUpdateProgress(false);
     };
 
     return (
@@ -41,10 +44,10 @@ const FilesPage = () => {
             {session ? (
             <>
             <FileManager refreshKey={refreshKey} onError={(msg) => showError(msg)} onSuccess={(msg) => showSuccess(msg)}/>
-            <ManifestEditor refreshKey={refreshKey} onError={showError}/>
+            <ManifestEditor refreshKey={refreshKey} onError={(msg) => showError(msg)} onSuccess={(msg) => showSuccess(msg)}/>
             <div style={{ textAlign: "center", marginTop: "30px" }}>
                 <p>Server Control</p>
-                <button onClick={updateServer}>Update Server</button>
+                <button onClick={updateServer} disabled={updateProgress}>Update Server</button>
             </div>
             </>
             ) : (

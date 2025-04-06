@@ -1,5 +1,3 @@
-// src/app/api/file/track/route.ts
-
 import { NextResponse } from 'next/server';
 import { manifestPath } from '@/config/const';
 import fs from 'fs';

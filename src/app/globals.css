@@ -89,17 +89,30 @@ button:disabled {
 }
 
 .file-item {
+  width: 100%;
   display: flex;
   justify-content: space-between;
   align-items: center; /* Ensures vertical alignment */
-  padding: 8px 12px;
+  padding-top: 0;
+  padding-bottom: 0;
   border-bottom: 1px solid #222222;
-  min-height: 16px; /* Ensures a consistent row height */
+  /*min-height: 16px;  Ensures a consistent row height */
+  opacity: 0;
+  max-height: 0px;
+  transition: all 0.3s ease-in-out;
+  overflow: hidden;
+}
+
+.file-item.show {
+  width: 100%;
+  opacity: 1;
+  max-height: 48px;
+  padding-top: 8px; /* Restore padding */
+  padding-bottom: 8px;
 }
 
 .file-item span {
   flex-grow: 1; /* Pushes text to the left */
-  display: flex;
   align-items: center; /* Aligns text with buttons */
 }
 

@@ -11,7 +11,7 @@ const Home = () => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const router = useRouter();
-  const { showMessage } = useMessage();
+  const { showError, showSuccess, showNotice } = useMessage();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -22,8 +22,9 @@ const Home = () => {
     });
 
     if (result?.error) {
-      showMessage("Invalid username or password", "error");
+      showError("Invalid username or password");
     } else {
+      showSuccess("Login success");
       router.push("/files");
     }
   };

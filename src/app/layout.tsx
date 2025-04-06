@@ -25,6 +25,7 @@ const RootLayout = ({ children }: { children: React.ReactNode }) => {
     <SessionProvider>
       <html lang="en">
         <head>
+          <title>Rekember Dashboard</title>
           <link rel="icon" href="/favicon.ico" />
         </head>
         <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>

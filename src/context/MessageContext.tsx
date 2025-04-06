@@ -2,6 +2,12 @@
 
 import React, { createContext, useContext, useState, useRef } from "react";
 
+export interface MsgContext {
+	refreshKey: number;
+	onError: (message: string) => void;
+	onSuccess: (message: string)  => void;
+}
+
 // Define the types for the context
 interface MessageContextType {
   showMessage: (msg: string, type: "success" | "error" | "notice") => void;

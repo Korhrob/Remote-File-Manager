@@ -2,13 +2,14 @@
 
 import { manifestPath } from '@/config/const';
 import { useEffect, useState } from 'react';
+import { MsgContext } from './MessageContext';
 
-interface ManifestEditorProps {
-  refreshKey: number;
-  onError: (message: string, type: "success" | "error") => void;
-}
+// interface ManifestEditorProps {
+//   refreshKey: number;
+//   onError: (message: string, type: "success" | "error") => void;
+// }
 
-const ManifestEditor: React.FC<ManifestEditorProps> = ({ refreshKey, onError }) => {
+const ManifestEditor: React.FC<MsgContext> = ({ refreshKey, onError, onSuccess }) => {
   const [manifestContent, setManifestContent] = useState('');
   const [isEditing, setIsEditing] = useState(false);
   const [newContent, setNewContent] = useState('');
@@ -23,12 +24,12 @@ const ManifestEditor: React.FC<ManifestEditorProps> = ({ refreshKey, onError }) 
 
       if (response.status == 404)
       {
-        return onError(`Failed to load manifest.`, "error");
+        return onError("Failed to load manifest.");
       }
 
       if (response.status == 400)
       {
-        onError("Manifest file is empty", "error");
+        onError("Manifest file is empty");
       }
 
       if (data.content) {
@@ -52,11 +53,11 @@ const ManifestEditor: React.FC<ManifestEditorProps> = ({ refreshKey, onError }) 
 
     const data = await response.json();
     if (data.message) {
-      onError('Manifest updated successfully.', "success");
+      onError('Manifest updated successfully.');
       setManifestContent(newContent); // Update the displayed content
       setIsEditing(false);
     } else {
-      onError('Failed to update manifest.', "error");
+      onError('Failed to update manifest.');
     }
   };
 
