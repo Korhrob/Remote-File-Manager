@@ -1,16 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import type { NextApiRequest, NextApiResponse } from "next"
 import { manifestPath, patchesPath } from '@/config/const';
-import { headers } from 'next/headers'
+import { validateApiKey } from '@/utils/validateApi'
 import fs from "fs/promises";
 
 export async function GET(req: NextApiRequest) {
     try {
-        const headersList = await headers()
-        const apiKey = headersList.get('x-api-key');
-        
-        if (apiKey !== process.env.NEXT_PUBLIC_API_KEY) {
-            return NextResponse.json({ error: "Unauthorized - invalid API key" }, { status: 401 });
+        const validationResponse = await validateApiKey();
+        if (validationResponse) {
+          return validationResponse;
         }
 
         const files = await fs.readdir(patchesPath);

@@ -2,17 +2,15 @@
 
 import { NextResponse } from 'next/server';
 import { manifestPath } from '@/config/const';
-import { headers } from 'next/headers'
+import { validateApiKey } from '@/utils/validateApi'
 import fs from 'fs';
 
 export async function GET() {
 
 	try {
-        const headersList = await headers()
-        const apiKey = headersList.get('x-api-key');
-
-        if (apiKey !== process.env.NEXT_PUBLIC_API_KEY) {
-            return NextResponse.json({ error: "Unauthorized - invalid API key" }, { status: 401 });
+        const validationResponse = await validateApiKey();
+        if (validationResponse) {
+          return validationResponse;
         }
 		
 		if (!fs.existsSync(manifestPath)) {
@@ -43,11 +41,9 @@ export async function GET() {
 
 export async function PATCH(request: Request) {
 	try {
-        const headersList = await headers()
-        const apiKey = headersList.get('x-api-key');
-
-        if (apiKey !== process.env.NEXT_PUBLIC_API_KEY) {
-            return NextResponse.json({ error: "Unauthorized - invalid API key" }, { status: 401 });
+        const validationResponse = await validateApiKey();
+        if (validationResponse) {
+          return validationResponse;
         }
 		
 		const { content } = await request.json();

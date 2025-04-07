@@ -3,16 +3,14 @@ import { patchesPath, maxFileSize } from '@/config/const';
 import type { NextApiRequest, NextApiResponse } from "next"
 import fs from 'fs';
 import path from 'path';
-import { headers } from 'next/headers'
+import { validateApiKey } from '@/utils/validateApi'
 
 export async function POST(req: NextApiRequest) {
 	
 	try {
-		const headersList = await headers()
-		const apiKey = headersList.get('x-api-key');
-		
-		if (apiKey !== process.env.NEXT_PUBLIC_API_KEY) {
-			return NextResponse.json({ error: "Unauthorized - invalid API key" }, { status: 401 });
+		const validationResponse = await validateApiKey();
+		if (validationResponse) {
+		  return validationResponse;
 		}
 
 		const filename = req.body;
