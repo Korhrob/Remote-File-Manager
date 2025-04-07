@@ -4,62 +4,63 @@ import { manifestPath } from '@/config/const';
 import { useEffect, useState } from 'react';
 import { MsgContext } from './MessageContext';
 
-// interface ManifestEditorProps {
-//   refreshKey: number;
-//   onError: (message: string, type: "success" | "error") => void;
-// }
-
 const ManifestEditor: React.FC<MsgContext> = ({ refreshKey, onError, onSuccess }) => {
-  const [manifestContent, setManifestContent] = useState('');
-  const [isEditing, setIsEditing] = useState(false);
-  const [newContent, setNewContent] = useState('');
-  const [loading, setLoading] = useState<boolean>(true);
+    const [manifestContent, setManifestContent] = useState('');
+    const [isEditing, setIsEditing] = useState(false);
+    const [newContent, setNewContent] = useState('');
+    const [loading, setLoading] = useState<boolean>(true);
 
-  // Fetch the current manifest file content when the component mounts
-  useEffect(() => {
-    const fetchManifest = async () => {
-      setLoading(true);
-      const response = await fetch('/api/manifest');
+    useEffect(() => {
+      const fetchManifest = async () => {
+        setLoading(true);
+        const res = await fetch("/api/manifest", {
+          method: "GET",
+          headers: { 
+              "Content-Type": "application/json", 
+              "x-api-key": process.env.NEXT_PUBLIC_API_KEY || ""
+          },
+        });
+        const data = await res.json();
+
+        if (res.status == 404)
+        {
+          return onError("Failed to load manifest.");
+        }
+
+        if (res.status == 400)
+        {
+          onError("Manifest file is empty");
+          // Don't have to return on empty file
+        }
+
+        if (data.content) {
+          setManifestContent(data.content);
+          setNewContent(data.content);
+        }
+        setLoading(false);
+      };
+      fetchManifest();
+    }, [refreshKey]);
+
+    const handleSave = async () => {
+      const response = await fetch('/api/manifest', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          "x-api-key": process.env.NEXT_PUBLIC_API_KEY || ""
+        },
+        body: JSON.stringify({ content: newContent }),
+      });
+
       const data = await response.json();
-
-      if (response.status == 404)
-      {
-        return onError("Failed to load manifest.");
+      if (data.message) {
+        onSuccess('Manifest updated successfully.');
+        setManifestContent(newContent);
+        setIsEditing(false);
+      } else {
+        onError('Failed to update manifest.');
       }
-
-      if (response.status == 400)
-      {
-        onError("Manifest file is empty");
-      }
-
-      if (data.content) {
-        setManifestContent(data.content);
-        setNewContent(data.content);
-      }
-      setLoading(false);
     };
-    fetchManifest();
-  }, [refreshKey]);
-
-  // Handle saving the updated manifest content
-  const handleSave = async () => {
-    const response = await fetch('/api/manifest', {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ content: newContent }),
-    });
-
-    const data = await response.json();
-    if (data.message) {
-      onError('Manifest updated successfully.');
-      setManifestContent(newContent); // Update the displayed content
-      setIsEditing(false);
-    } else {
-      onError('Failed to update manifest.');
-    }
-  };
 
   return (
     <div>

@@ -4,7 +4,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { exec } from 'child_process';
 import { promisify } from 'util';
 
-// Convert exec to return a promise
 const execPromise = promisify(exec);
 
 export async function GET(req: NextRequest) {

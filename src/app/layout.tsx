@@ -29,7 +29,6 @@ const RootLayout = ({ children }: { children: React.ReactNode }) => {
           <link rel="icon" href="/favicon.ico" />
         </head>
         <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-          {/* Wrap children with MessageProvider */}
           <MessageProvider>
             {children}
             <MessageDisplay />

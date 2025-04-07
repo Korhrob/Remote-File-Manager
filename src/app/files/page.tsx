@@ -25,11 +25,17 @@ const FilesPage = () => {
         setUpdateProgress(true);
         showNotice("Fetching and pulling server...");
         try {
-            const res = await fetch("/api/server/update");
+            const res = await fetch("/api/server/update", {
+                method: "GET",
+                headers: { 
+                    "Content-Type": "application/json", 
+                    "x-api-key": process.env.NEXT_PUBLIC_API_KEY || ""
+                },
+            });
             if (!res.ok) {
                 throw new Error("Failed to update server");
             }
-            const data = await res.json();
+            //const data = await res.json();
             showSuccess("Server up to date");
         } catch (error) {
             showError("Could not fetch patch files.");

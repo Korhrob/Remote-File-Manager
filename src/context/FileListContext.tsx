@@ -4,12 +4,6 @@ import { patchesPath, maxFileSize } from '@/config/const';
 import { useEffect, useState, useRef } from 'react';
 import { MsgContext } from './MessageContext';
 
-// interface FileManagerProps {
-// 	refreshKey: number;
-// 	onError: (message: string) => void;
-// 	onSuccess: (message: string)  => void;
-// }
-
 const FileManager: React.FC<MsgContext> = ({ refreshKey, onError, onSuccess }) => {
 
     const [trackedFiles, setTrackedFiles] = useState<string[]>([]);
@@ -22,23 +16,37 @@ const FileManager: React.FC<MsgContext> = ({ refreshKey, onError, onSuccess }) =
         const fetchFiles = async () => {
             setLoading(true);
             try {
-                const res = await fetch("/api/file/list");
+                console.log(`PUBLIC_API_KEY:\n${process.env.NEXT_PUBLIC_API_KEY}`);
+                
+                const res = await fetch("/api/file/list", {
+                    method: "GET",
+                    headers: { 
+                        "Content-Type": "application/json", 
+                        "x-api-key": process.env.NEXT_PUBLIC_API_KEY || ""
+                    },
+                });
+
                 if (!res.ok) {
                     throw new Error("Failed to fetch files");
                 }
+
                 const data = await res.json();
                 setTrackedFiles(data.tracked || []);
                 setUntrackedFiles(data.untracked || []); 
                 const allFileItems = document.querySelectorAll('.file-item');
                 allFileItems.forEach(item => {
-                    item.classList.add('show');
+                    item.classList.add("show");
                 });
+
             } catch (error) {
 				onError("Could not fetch patch files.");
+
             }
             setLoading(false);
+
         };
         fetchFiles();
+
     }, [refreshKey]);
 
     const triggerFileClass = (newFiles: string[], prevFiles: string[]) => {
@@ -46,7 +54,7 @@ const FileManager: React.FC<MsgContext> = ({ refreshKey, onError, onSuccess }) =
             newFiles.forEach((file) => {
                 const fileItem = document.querySelector(`.file-item[data-file="${file}"]`);
                 if (fileItem) {
-                    fileItem.classList.add('show');
+                    fileItem.classList.add("show");
                 }
             });
         }, 50);
@@ -56,8 +64,9 @@ const FileManager: React.FC<MsgContext> = ({ refreshKey, onError, onSuccess }) =
         try {
         const response = await fetch('/api/file/track', {
             method: 'POST',
-            headers: {
-            'Content-Type': 'application/json',
+            headers: { 
+                "Content-Type": "application/json",  
+                "x-api-key": process.env.NEXT_PUBLIC_API_KEY || ""
             },
             body: JSON.stringify({ filename: file }),
         });
@@ -91,9 +100,13 @@ const FileManager: React.FC<MsgContext> = ({ refreshKey, onError, onSuccess }) =
                 fileItem.classList.remove('show');
             }
 
-            
-            const res = await fetch(`/api/file/delete?filename=${filename}`, {
+            const res = await fetch(`/api/file/delete`, {
                 method: "DELETE",
+                headers: { 
+                    "Content-Type": "application/json",  
+                    "x-api-key": process.env.NEXT_PUBLIC_API_KEY || ""
+                },
+                body: JSON.stringify({ filename }),
             });
             
             const data = await res.json();
@@ -119,7 +132,10 @@ const FileManager: React.FC<MsgContext> = ({ refreshKey, onError, onSuccess }) =
         try {
             const res = await fetch("/api/file/rename", {
                 method: "PATCH",
-                headers: { "Content-Type": "application/json" },
+                headers: { 
+                    "Content-Type": "application/json",  
+                    "x-api-key": process.env.NEXT_PUBLIC_API_KEY || ""
+                },
                 body: JSON.stringify({ oldFilename, newFilename }),
             });
     
@@ -150,7 +166,15 @@ const FileManager: React.FC<MsgContext> = ({ refreshKey, onError, onSuccess }) =
             return;
         }
 
-        const res = await fetch(`/api/file/upload?filename=${encodeURIComponent(file.name)}`);
+        const res = await fetch(`/api/file/exist`, {
+            method: "POST",
+            headers: { 
+                "Content-Type": "application/json",  
+                "x-api-key": process.env.NEXT_PUBLIC_API_KEY || ""
+            },
+            body: JSON.stringify({ filename: file.name }),
+        });
+
         const uploadData = await res.json();
         if (uploadData.exists) {
             onError("Error: File already exists");
@@ -193,6 +217,7 @@ const FileManager: React.FC<MsgContext> = ({ refreshKey, onError, onSuccess }) =
             const formData = new FormData();
             formData.append("patch", file);
             xhr.open("POST", "/api/file/upload", true);
+            xhr.setRequestHeader("x-api-key", process.env.NEXT_PUBLIC_API_KEY || "");
             xhr.send(formData);
         } catch (error) {
             onError("An error occurred during file upload.");
@@ -206,7 +231,7 @@ const FileManager: React.FC<MsgContext> = ({ refreshKey, onError, onSuccess }) =
 			<p>{patchesPath}</p>
 			
 			<ul className="file-list">
-                {loading && <p>"Loading..."</p> }
+                {loading && <p>Loading...</p> }
 
 				{trackedFiles && trackedFiles.map((file) => (
 					<li key={file} className="tracked file-item" data-file={file}>

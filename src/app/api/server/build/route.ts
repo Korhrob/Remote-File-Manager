@@ -5,7 +5,6 @@ import { exec } from 'child_process';
 import { promisify } from 'util';
 import { spawn } from "child_process";
 
-// Convert exec to return a promise
 const execPromise = promisify(exec);
 
 export async function GET(req: NextRequest, res: NextResponse) {
