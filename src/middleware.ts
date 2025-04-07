@@ -1,6 +1,5 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { headers } from 'next/headers';
-import { NextRequest } from 'next';
 
 export default async function validateApiKey(req: NextRequest) {
   const headersList = await headers();

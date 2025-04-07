@@ -7,7 +7,7 @@ import { spawn } from "child_process";
 
 const execPromise = promisify(exec);
 
-export async function GET(req: NextRequest, res: NextResponse) {
+export async function GET(req: NextRequest) {
 	try {
 		const build = spawn("make", ["build"], { cwd: serverPath });
 

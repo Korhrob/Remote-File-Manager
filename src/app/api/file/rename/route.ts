@@ -3,7 +3,7 @@ import { patchesPath } from '@/config/const';
 import fs from 'fs';
 import path from 'path';
 
-export async function PATCH(req: NextRequest, res: NextResponse) {
+export async function PATCH(req: NextRequest) {
     try {
         const { oldFilename, newFilename } = await req.json();
 

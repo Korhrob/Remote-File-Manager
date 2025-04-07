@@ -17,7 +17,7 @@ export async function GET(req: NextRequest) {
 		}
 
 		console.log("git pull");
-		const { stdout, stderr } = await execPromise('git pull', { cwd: serverPath });
+		const { stdout, stderr } = await execPromise('git pull &', { cwd: serverPath });
 
 		if (stderr) {
 			return NextResponse.json({ message: `git pull failed: ${stderr}` }, { status: 500 });

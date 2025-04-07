@@ -48,7 +48,7 @@ const FilesPage = () => {
 
             {session ? (
             <>
-            <FileManager refreshKey={refreshKey} onError={(msg) => showError(msg)} onSuccess={(msg) => {showSuccess(msg); setRefreshKey(prev => prev + 1);}}/>
+            <FileManager refreshKey={0} onError={(msg) => showError(msg)} onSuccess={(msg) => {showSuccess(msg); setRefreshKey(prev => prev + 1);}}/>
             <ManifestEditor refreshKey={refreshKey} onError={(msg) => showError(msg)} onSuccess={(msg) => {showSuccess(msg); setRefreshKey(prev => prev + 1);}}/>
             <div style={{ textAlign: "center", marginTop: "30px" }}>
                 <p>Server Control</p>
