@@ -42,15 +42,14 @@ const FilesPage = () => {
         }
         setUpdateProgress(false);
     };
-
     return (
 
         <div className="page">
 
             {session ? (
             <>
-            <FileManager refreshKey={refreshKey} onError={(msg) => showError(msg)} onSuccess={(msg) => showSuccess(msg)}/>
-            <ManifestEditor refreshKey={refreshKey} onError={(msg) => showError(msg)} onSuccess={(msg) => showSuccess(msg)}/>
+            <FileManager refreshKey={refreshKey} onError={(msg) => showError(msg)} onSuccess={(msg) => {showSuccess(msg); setRefreshKey(prev => prev + 1);}}/>
+            <ManifestEditor refreshKey={refreshKey} onError={(msg) => showError(msg)} onSuccess={(msg) => {showSuccess(msg); setRefreshKey(prev => prev + 1);}}/>
             <div style={{ textAlign: "center", marginTop: "30px" }}>
                 <p>Server Control</p>
                 <button onClick={updateServer} disabled={updateProgress}>Update Server</button>

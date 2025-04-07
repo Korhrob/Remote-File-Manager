@@ -8,9 +8,6 @@ import type { FileItem } from '@/types/filetype';
 const FileManager: React.FC<MsgContext> = ({ refreshKey, onError, onSuccess }) => {
 
     const [files, setFiles] = useState<FileItem[]>([]);
-
-    const [trackedFiles, setTrackedFiles] = useState<string[]>([]);
-    const [untrackedFiles, setUntrackedFiles] = useState<string[]>([]);
     const [uploadProgress, setUploadProgress] = useState(0);
     const [loading, setLoading] = useState<boolean>(false);
 	const fileInputRef = useRef<HTMLInputElement | null>(null);
