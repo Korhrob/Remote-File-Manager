@@ -1,22 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { patchesPath, maxFileSize } from '@/config/const';
-import type { NextApiRequest, NextApiResponse } from "next"
 import fs from 'fs';
 import path from 'path';
-import { validateApiKey } from '@/utils/validateApi'
 
-export async function POST(req: NextApiRequest) {
+export async function POST(req: NextRequest) {
 	
 	try {
-		const validationResponse = await validateApiKey();
-		if (validationResponse) {
-		  return validationResponse;
-		}
 
-		const filename = req.body;
+		const { filename } = await req.json();
 	
 		if (!filename) {
-			return NextResponse.json({ error: "Filename is required" }, { status: 400 });
+			return NextResponse.json({ message: "Filename is required" }, { status: 400 });
 		}
 
 		const filePath = path.join(patchesPath, filename);

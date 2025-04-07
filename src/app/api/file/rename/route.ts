@@ -1,21 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
-import type { NextApiRequest, NextApiResponse } from "next"
 import { patchesPath } from '@/config/const';
 import fs from 'fs/promises';
 import path from 'path';
-import { validateApiKey } from '@/utils/validateApi'
 
-export async function PATCH(req: NextApiRequest) {
+export async function PATCH(req: NextRequest, res: NextResponse) {
     try {
-        const validationResponse = await validateApiKey();
-        if (validationResponse) {
-          return validationResponse;
-        }
-
-        const { oldFilename, newFilename } = await req.body;
+        const { oldFilename, newFilename } = await req.json();
 
         if (!oldFilename || !newFilename) {
-            return NextResponse.json({ error: "Invalid filenames provided." }, { status: 400 });
+            console.log(`${oldFilename} : ${newFilename}`);
+            return NextResponse.json({ message: "Invalid filenames provided." }, { status: 400 });
         }
 
         const oldFilePath = path.join(patchesPath, oldFilename);
@@ -24,7 +18,7 @@ export async function PATCH(req: NextApiRequest) {
         try {
             await fs.access(oldFilePath);
         } catch (error) {
-            return NextResponse.json({ error: "File not found." }, { status: 404 });
+            return NextResponse.json({ message: "File not found." }, { status: 404 });
         }
 
         await fs.rename(oldFilePath, newFilePath);
@@ -34,7 +28,7 @@ export async function PATCH(req: NextApiRequest) {
 
     } catch (error) {
         console.error("Rename error:", error);
-        return NextResponse.json({ error: "Error renaming file." }, { status: 500 });
+        return NextResponse.json({ message: "Error renaming file." }, { status: 500 });
 
     }
 }

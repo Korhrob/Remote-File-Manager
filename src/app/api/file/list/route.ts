@@ -1,15 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import type { NextApiRequest, NextApiResponse } from "next"
 import { manifestPath, patchesPath } from '@/config/const';
-import { validateApiKey } from '@/utils/validateApi'
 import fs from "fs/promises";
 
-export async function GET(req: NextApiRequest) {
+export async function GET(req: NextRequest) {
     try {
-        const validationResponse = await validateApiKey();
-        if (validationResponse) {
-          return validationResponse;
-        }
 
         const files = await fs.readdir(patchesPath);
 
@@ -29,7 +23,7 @@ export async function GET(req: NextApiRequest) {
         return NextResponse.json(({ tracked, untracked }), { status: 200 });
 
     } catch (error) {
-        return NextResponse.json({ error: "Failed to list patch files" }, { status: 500 });
+        return NextResponse.json({ message: "Failed to list patch files" }, { status: 500 });
         
     }
 }

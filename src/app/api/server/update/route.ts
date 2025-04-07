@@ -13,19 +13,19 @@ export async function GET(req: NextRequest) {
 		const { stdout: fetchStdout, stderr: fetchStderr } = await execPromise('git fetch', { cwd: serverPath });
 
 		if (fetchStderr) {
-			return NextResponse.json({ error: `git fetch failed: ${fetchStderr}` }, { status: 500 });
+			return NextResponse.json({ message: `git fetch failed: ${fetchStderr}` }, { status: 500 });
 		}
 
 		console.log("git pull");
 		const { stdout, stderr } = await execPromise('git pull', { cwd: serverPath });
 
 		if (stderr) {
-			return NextResponse.json({ error: `git pull failed: ${stderr}` }, { status: 500 });
+			return NextResponse.json({ message: `git pull failed: ${stderr}` }, { status: 500 });
 		}
 
 		return NextResponse.json({ message: `git pull successful: ${stdout}` });
 	} catch (error: any) {
 		console.error('Error executing git fetch or pull:', error);
-		return NextResponse.json({ error: `Failed to execute git fetch or pull: ${error.message}` }, { status: 500 });
+		return NextResponse.json({ message: `Failed to execute git fetch or pull: ${error.message}` }, { status: 500 });
 	}
 }

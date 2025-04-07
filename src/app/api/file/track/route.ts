@@ -1,21 +1,15 @@
-import { NextResponse } from 'next/server';
-import type { NextApiRequest, NextApiResponse } from "next"
+import { NextRequest, NextResponse } from 'next/server';
 import { manifestPath } from '@/config/const';
 import fs from 'fs';
-import { validateApiKey } from '@/utils/validateApi'
 
-export async function POST(req: NextApiRequest) {
+export async function POST(req: NextRequest) {
 
     try {
-        const validationResponse = await validateApiKey();
-        if (validationResponse) {
-          return validationResponse;
-        }
 
-        const { filename } = await req.body;
+        const { filename } = await req.json();
 
         if (!filename) {
-            return NextResponse.json({ error: 'Filename is required' }, { status: 400 });
+            return NextResponse.json({ message: 'Filename is required' }, { status: 400 });
         }
 
         const manifestData = await fs.promises.readFile(manifestPath, 'utf8');
@@ -31,11 +25,11 @@ export async function POST(req: NextApiRequest) {
 
         await fs.promises.writeFile(manifestPath, updatedManifest, 'utf8');
 
-        return NextResponse.json({ message: 'File tracked successfully' });
+        return NextResponse.json({ message: 'File tracked successfully' }, { status: 200 });
 
     } catch (error) {
         console.error('Error tracking file:', error);
-        return NextResponse.json({ error: 'Failed to track file' }, { status: 500 });
+        return NextResponse.json({ message: 'Failed to track file' }, { status: 500 });
 
     }
 }

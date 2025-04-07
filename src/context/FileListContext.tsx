@@ -111,14 +111,13 @@ const FileManager: React.FC<MsgContext> = ({ refreshKey, onError, onSuccess }) =
             
             const data = await res.json();
 
-            
             if (res.ok) {
                 onSuccess(`File deleted successfully: ${filename}`);
                 await new Promise(resolve => setTimeout(resolve, 300));
                 setTrackedFiles((prevFiles) => prevFiles.filter((file) => file !== filename));
                 setUntrackedFiles((prevFiles) => prevFiles.filter((file) => file !== filename));
             } else {
-                onError(`Error: ${data.error}`);
+                onError(`Error: ${data.message}`);
             }
         } catch (error) {
             onError("An error occurred during deletion.");
@@ -126,10 +125,26 @@ const FileManager: React.FC<MsgContext> = ({ refreshKey, onError, onSuccess }) =
     };
 
     const handleRename = async (oldFilename: string) => {
-        const newFilename = prompt(`Rename "${oldFilename}" to:`);
-        if (!newFilename || newFilename.trim() === oldFilename) return;
-    
+        
         try {
+            const newFilename = prompt(`Rename "${oldFilename}" to:`);
+            if (!newFilename || newFilename.trim() === oldFilename) return;
+
+            const check = await fetch(`/api/file/exist`, {
+                method: "POST",
+                headers: { 
+                    "Content-Type": "application/json",  
+                    "x-api-key": process.env.NEXT_PUBLIC_API_KEY || ""
+                },
+                body: JSON.stringify({ filename: newFilename }),
+            });
+    
+            const checkData = await check.json();
+            if (checkData.exists) {
+                onError("Error: File already exists");
+                return;
+            }
+
             const res = await fetch("/api/file/rename", {
                 method: "PATCH",
                 headers: { 
@@ -143,15 +158,15 @@ const FileManager: React.FC<MsgContext> = ({ refreshKey, onError, onSuccess }) =
             if (res.ok) {
                 setTrackedFiles(prev => prev.map(f => (f === oldFilename ? newFilename : f)));
                 setUntrackedFiles(prev => prev.map(f => (f === oldFilename ? newFilename : f)));
+                triggerFileClass([newFilename], []);
                 onSuccess(`Renamed "${oldFilename}" to "${newFilename}"`);
             } else {
-                onError(`Error: ${data.error}`);
+                onError(`Error: ${data.message}`);
             }
         } catch (error) {
             onError("An error occurred during renaming.");
         }
     };
-
 
     const triggerFileInput = () => {
         if (fileInputRef.current) {
@@ -160,33 +175,34 @@ const FileManager: React.FC<MsgContext> = ({ refreshKey, onError, onSuccess }) =
     };
 
     const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (!file) {
-            onError("No file selected.");
-            return;
-        }
-
-        const res = await fetch(`/api/file/exist`, {
-            method: "POST",
-            headers: { 
-                "Content-Type": "application/json",  
-                "x-api-key": process.env.NEXT_PUBLIC_API_KEY || ""
-            },
-            body: JSON.stringify({ filename: file.name }),
-        });
-
-        const uploadData = await res.json();
-        if (uploadData.exists) {
-            onError("Error: File already exists");
-            return;
-        }
-
-		if (file.size > maxFileSize) {
-			onError(`File size is too large! Maximum allowed size is ${maxFileSize} MB.`);
-			return;
-		}
 
         try {
+            const file = e.target.files?.[0];
+            if (!file) {
+                onError("No file selected.");
+                return;
+            }
+    
+            const res = await fetch(`/api/file/exist`, {
+                method: "POST",
+                headers: { 
+                    "Content-Type": "application/json",  
+                    "x-api-key": process.env.NEXT_PUBLIC_API_KEY || ""
+                },
+                body: JSON.stringify({ filename: file.name }),
+            });
+    
+            const uploadData = await res.json();
+            if (uploadData.exists) {
+                onError("Error: File already exists");
+                return;
+            }
+    
+            if (file.size > maxFileSize) {
+                onError(`File size is too large! Maximum allowed size is ${maxFileSize} MB.`);
+                return;
+            }
+
             const xhr = new XMLHttpRequest();
     
             xhr.upload.onprogress = (event) => {
@@ -205,13 +221,13 @@ const FileManager: React.FC<MsgContext> = ({ refreshKey, onError, onSuccess }) =
                     triggerFileClass([file.name], []);
                     setUploadProgress(0);
                 } else {
-                    console.error(`Something wrong: ${response.error}, ${response.status}`);
-                    onError(`Error: ${response.error}`);
+                    console.error(`Something wrong: ${response.message}, ${response.status}`);
+                    onError(`Error: ${response.message}`);
                 }
             };
     
             xhr.onerror = () => {
-                onError(`Error: ${JSON.parse(xhr.response).error}`);
+                onError(`Error: ${JSON.parse(xhr.response).message}`);
             };
 
             const formData = new FormData();

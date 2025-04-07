@@ -36,6 +36,6 @@ export async function GET(req: NextRequest, res: NextResponse) {
 
 	} catch (error: any) {
 		console.error('Error executing git pull:', error);
-		return NextResponse.json({ error: `Failed to execute build: ${error.message}` }, { status: 500 });
+		return NextResponse.json({ message: `Failed to execute build: ${error.message}` }, { status: 500 });
 	}
 }
