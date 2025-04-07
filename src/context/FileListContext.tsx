@@ -75,7 +75,7 @@ const FileManager: React.FC<MsgContext> = ({ refreshKey, onError, onSuccess }) =
         if (data.message) {
             setUntrackedFiles((prev) => prev.filter((f) => f !== file));
             setTrackedFiles((prev) => [...prev, file]);
-            //triggerFileClass([...trackedFiles, file], trackedFiles, 'tracked');
+            triggerFileClass([file], []);
             //setRefreshKey(prevKey => prevKey + 1); // Should be used in page
             onSuccess(`File ${file} has been tracked.`);
         } else {
@@ -129,21 +129,6 @@ const FileManager: React.FC<MsgContext> = ({ refreshKey, onError, onSuccess }) =
         try {
             const newFilename = prompt(`Rename "${oldFilename}" to:`);
             if (!newFilename || newFilename.trim() === oldFilename) return;
-
-            const check = await fetch(`/api/file/exist`, {
-                method: "POST",
-                headers: { 
-                    "Content-Type": "application/json",  
-                    "x-api-key": process.env.NEXT_PUBLIC_API_KEY || ""
-                },
-                body: JSON.stringify({ filename: newFilename }),
-            });
-    
-            const checkData = await check.json();
-            if (checkData.exists) {
-                onError("Error: File already exists");
-                return;
-            }
 
             const res = await fetch("/api/file/rename", {
                 method: "PATCH",
@@ -204,7 +189,11 @@ const FileManager: React.FC<MsgContext> = ({ refreshKey, onError, onSuccess }) =
             }
 
             const xhr = new XMLHttpRequest();
-    
+            const formData = new FormData();
+            formData.append("patch", file);
+            xhr.open("POST", "/api/file/upload", true);
+            xhr.setRequestHeader("x-api-key", process.env.NEXT_PUBLIC_API_KEY || "");
+
             xhr.upload.onprogress = (event) => {
                 if (event.lengthComputable) {
                     const percentComplete = Math.round((event.loaded / event.total) * 100);
@@ -225,18 +214,16 @@ const FileManager: React.FC<MsgContext> = ({ refreshKey, onError, onSuccess }) =
                     onError(`Error: ${response.message}`);
                 }
             };
-    
+            
             xhr.onerror = () => {
                 onError(`Error: ${JSON.parse(xhr.response).message}`);
             };
-
-            const formData = new FormData();
-            formData.append("patch", file);
-            xhr.open("POST", "/api/file/upload", true);
-            xhr.setRequestHeader("x-api-key", process.env.NEXT_PUBLIC_API_KEY || "");
+            
             xhr.send(formData);
+
         } catch (error) {
             onError("An error occurred during file upload.");
+            
         }
 
     };

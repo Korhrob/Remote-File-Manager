@@ -1,5 +1,3 @@
-// app/api/upload/route.js
-
 import fs from 'fs';
 import path from 'path';
 import { NextRequest, NextResponse } from 'next/server';
@@ -18,9 +16,10 @@ export async function POST(request: NextRequest) {
     console.log(filePath);
 
     try {
-        await fs.promises.access(filePath, fs.constants.F_OK); // Check if file exists
+        await fs.promises.access(filePath, fs.constants.F_OK);
         return NextResponse.json({ message: "File with this name already exists." }, { status: 400 });
-    } catch (err: any) {
+
+    } catch (error) {
 
     }
 

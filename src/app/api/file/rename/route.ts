@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { patchesPath } from '@/config/const';
-import fs from 'fs/promises';
+import fs from 'fs';
 import path from 'path';
 
 export async function PATCH(req: NextRequest, res: NextResponse) {
@@ -16,12 +16,20 @@ export async function PATCH(req: NextRequest, res: NextResponse) {
         const newFilePath = path.join(patchesPath, newFilename);
 
         try {
-            await fs.access(oldFilePath);
+            await fs.promises.access(oldFilePath);
         } catch (error) {
             return NextResponse.json({ message: "File not found." }, { status: 404 });
         }
 
-        await fs.rename(oldFilePath, newFilePath);
+        try {
+            await fs.promises.access(newFilePath, fs.constants.F_OK);
+            return NextResponse.json({ message: "File with this name already exists." }, { status: 400 });
+
+        } catch (err: any) {
+            // 
+        }
+    
+        await fs.promises.rename(oldFilePath, newFilePath);
         console.log(`Renamed: ${oldFilename} → ${newFilename}`);
 
         return NextResponse.json({ message: "File renamed successfully." }, { status: 200 });
