@@ -3,8 +3,11 @@
 import { patchesPath, maxFileSize } from '@/config/const';
 import { useEffect, useState, useRef } from 'react';
 import { MsgContext } from './MessageContext';
+import type { FileItem } from '@/types/filetype';
 
 const FileManager: React.FC<MsgContext> = ({ refreshKey, onError, onSuccess }) => {
+
+    const [files, setFiles] = useState<FileItem[]>([]);
 
     const [trackedFiles, setTrackedFiles] = useState<string[]>([]);
     const [untrackedFiles, setUntrackedFiles] = useState<string[]>([]);
@@ -30,9 +33,9 @@ const FileManager: React.FC<MsgContext> = ({ refreshKey, onError, onSuccess }) =
                     throw new Error("Failed to fetch files");
                 }
 
-                const data = await res.json();
-                setTrackedFiles(data.tracked || []);
-                setUntrackedFiles(data.untracked || []); 
+                const data: FileItem[] = await res.json();
+                setFiles(data);
+
                 const allFileItems = document.querySelectorAll('.file-item');
                 allFileItems.forEach(item => {
                     item.classList.add("show");
@@ -49,15 +52,18 @@ const FileManager: React.FC<MsgContext> = ({ refreshKey, onError, onSuccess }) =
 
     }, [refreshKey]);
 
-    const triggerFileClass = (newFiles: string[], prevFiles: string[]) => {
+    useEffect(() => {
         setTimeout(() => {
-            newFiles.forEach((file) => {
-                const fileItem = document.querySelector(`.file-item[data-file="${file}"]`);
-                if (fileItem) {
-                    fileItem.classList.add("show");
-                }
+            const allFileItems = document.querySelectorAll('.file-item');
+            allFileItems.forEach(item => {
+                item.classList.add("show");
             });
         }, 50);
+    }, [files]); // Runs every time the `files` state changes (i.e., when a file is added)
+
+    // switch tracked state
+    const toggleTracked = (name: string) => {
+        setFiles(prev => prev.map(file => file.name === name ? { ...file, tracked: !file.tracked } : file ));
     };
 
     const handleTrack = async (file: string) => {
@@ -73,10 +79,10 @@ const FileManager: React.FC<MsgContext> = ({ refreshKey, onError, onSuccess }) =
 
         const data = await response.json();
         if (data.message) {
-            setUntrackedFiles((prev) => prev.filter((f) => f !== file));
-            setTrackedFiles((prev) => [...prev, file]);
-            triggerFileClass([file], []);
-            //setRefreshKey(prevKey => prevKey + 1); // Should be used in page
+
+            toggleTracked(file);
+
+            //setRefreshKey(prevKey => prevKey + 1); // fetches list again
             onSuccess(`File ${file} has been tracked.`);
         } else {
             onError("Failed to track file.");
@@ -114,8 +120,8 @@ const FileManager: React.FC<MsgContext> = ({ refreshKey, onError, onSuccess }) =
             if (res.ok) {
                 onSuccess(`File deleted successfully: ${filename}`);
                 await new Promise(resolve => setTimeout(resolve, 300));
-                setTrackedFiles((prevFiles) => prevFiles.filter((file) => file !== filename));
-                setUntrackedFiles((prevFiles) => prevFiles.filter((file) => file !== filename));
+                setFiles(prevFiles => prevFiles.filter(file => file.name !== filename));
+
             } else {
                 onError(`Error: ${data.message}`);
             }
@@ -141,10 +147,8 @@ const FileManager: React.FC<MsgContext> = ({ refreshKey, onError, onSuccess }) =
     
             const data = await res.json();
             if (res.ok) {
-                setTrackedFiles(prev => prev.map(f => (f === oldFilename ? newFilename : f)));
-                setUntrackedFiles(prev => prev.map(f => (f === oldFilename ? newFilename : f)));
-                triggerFileClass([newFilename], []);
                 onSuccess(`Renamed "${oldFilename}" to "${newFilename}"`);
+                setFiles((prevFiles) => prevFiles.map(file => file.name === oldFilename ? { ...file, name: newFilename } : file ));
             } else {
                 onError(`Error: ${data.message}`);
             }
@@ -206,8 +210,7 @@ const FileManager: React.FC<MsgContext> = ({ refreshKey, onError, onSuccess }) =
                 const response = JSON.parse(xhr.response);
                 if (xhr.status === 200) {
                     onSuccess(`File uploaded successfully: ${file.name}`);
-                    setUntrackedFiles((prevFiles) => [...prevFiles, file.name]);
-                    triggerFileClass([file.name], []);
+                    setFiles(prevFiles => [...prevFiles, { name: file.name, tracked: false } ]);
                     setUploadProgress(0);
                 } else {
                     console.error(`Something wrong: ${response.message}, ${response.status}`);
@@ -236,22 +239,22 @@ const FileManager: React.FC<MsgContext> = ({ refreshKey, onError, onSuccess }) =
 			<ul className="file-list">
                 {loading && <p>Loading...</p> }
 
-				{trackedFiles && trackedFiles.map((file) => (
-					<li key={file} className="tracked file-item" data-file={file}>
-						<span>{file}</span>
+				{files && files.filter(f => f.tracked).map(file => (
+					<li key={file.name} className="file-item tracked" data-file={file.name}>
+						<span>{file.name}</span>
 						<div className="file-actions">
-							<button onClick={() => handleRename(file)}>Rename</button>
-							<button className="delete-button" onClick={() => handleDelete(file)}>Delete</button>
+							<button onClick={() => handleRename(file.name)}>Rename</button>
+							<button className="delete-button" onClick={() => handleDelete(file.name)}>Delete</button>
 						</div>
 					</li>
 				))}
-				{untrackedFiles && untrackedFiles.map((file) => (
-					<li key={file} className="untracked file-item" data-file={file}>
-						<span>{file}</span>
+				{files && files.filter(f => !f.tracked).map(file => (
+					<li key={file.name} className="file-item untracked" data-file={file.name}>
+						<span>{file.name}</span>
 						<div className="file-actions">
-							<button onClick={() => handleTrack(file)}>Track</button>
-							<button onClick={() => handleRename(file)}>Rename</button>
-							<button className="delete-button" onClick={() => handleDelete(file)}>Delete</button>
+							<button onClick={() => handleTrack(file.name)}>Track</button>
+							<button onClick={() => handleRename(file.name)}>Rename</button>
+							<button className="delete-button" onClick={() => handleDelete(file.name)}>Delete</button>
 						</div>
 					</li>
 				))}

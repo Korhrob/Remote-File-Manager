@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { manifestPath, patchesPath } from '@/config/const';
+import type { FileItem } from '@/types/filetype';
 import fs from "fs/promises";
 
 export async function GET(req: NextRequest) {
@@ -17,10 +18,14 @@ export async function GET(req: NextRequest) {
             console.log("Manifest file missing or unreadable, assuming empty.");
         }
 
-        const tracked = files.filter(file => manifestEntries.includes(file));
-        const untracked = files.filter(file => !manifestEntries.includes(file) && file !== "manifest.txt");
+        const fileItems: FileItem[] = files
+            .filter(file => file !== "manifest.txt")
+            .map(file => ({
+                name: file,
+                tracked: manifestEntries.includes(file),
+        }));
 
-        return NextResponse.json(({ tracked, untracked }), { status: 200 });
+        return NextResponse.json( fileItems , { status: 200 });
 
     } catch (error) {
         return NextResponse.json({ message: "Failed to list patch files" }, { status: 500 });

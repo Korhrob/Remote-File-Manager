@@ -86,27 +86,35 @@ button:disabled {
 .file-list {
   list-style: none;
   padding: 0;
+  overflow: hidden;
+  transition: all 0.5s ease-in-out;
+  min-height: 32px;
+}
+
+.file-list.show {
+  max-height: none;
+  opacity: 1;
 }
 
 .file-item {
   width: 100%;
   display: flex;
   justify-content: space-between;
-  align-items: center; /* Ensures vertical alignment */
+  align-items: center;
+  border-bottom: 1px solid #222222;
+  overflow: hidden;
+
   padding-top: 0;
   padding-bottom: 0;
-  border-bottom: 1px solid #222222;
+  max-height: 0;
   opacity: 0;
-  max-height: 0px;
-  transition: all 0.3s ease-in-out;
-  overflow: hidden;
+  transition: opacity 0.3s ease-in-out, max-height 0.15s ease-in-out 0.15s, padding-top 0.15s ease-in-out 0.15s, padding-bottom 0.15s ease-in-out 0.15s;
 }
 
 .file-item.show {
-  width: 100%;
+  max-height: 999px;
   opacity: 1;
-  max-height: 48px;
-  padding-top: 8px; /* Restore padding */
+  padding-top: 8px;
   padding-bottom: 8px;
 }
 
