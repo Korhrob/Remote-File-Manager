@@ -29,7 +29,7 @@ const FilesPage = () => {
                 method: "GET",
                 headers: { 
                     "Content-Type": "application/json", 
-                    "x-api-key": process.env.NEXT_PUBLIC_API_KEY || ""
+                    "x-api-key": process.env.NEXT_API_KEY || ""
                 },
             });
             if (!res.ok) {

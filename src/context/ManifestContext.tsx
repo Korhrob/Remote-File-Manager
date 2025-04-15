@@ -17,7 +17,7 @@ const ManifestEditor: React.FC<MsgContext> = ({ refreshKey, onError, onSuccess }
           method: "GET",
           headers: { 
               "Content-Type": "application/json", 
-              "x-api-key": process.env.NEXT_PUBLIC_API_KEY || ""
+              "x-api-key": process.env.NEXT_API_KEY || ""
           },
         });
         const data = await res.json();
@@ -47,7 +47,7 @@ const ManifestEditor: React.FC<MsgContext> = ({ refreshKey, onError, onSuccess }
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
-          "x-api-key": process.env.NEXT_PUBLIC_API_KEY || ""
+          "x-api-key": process.env.NEXT_API_KEY || ""
         },
         body: JSON.stringify({ content: newContent }),
       });

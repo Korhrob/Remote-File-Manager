@@ -16,13 +16,13 @@ const FileManager: React.FC<MsgContext> = ({ refreshKey, onError, onSuccess }) =
         const fetchFiles = async () => {
             setLoading(true);
             try {
-                console.log(`PUBLIC_API_KEY:\n${process.env.NEXT_PUBLIC_API_KEY}`);
+                console.log(`PUBLIC_API_KEY:\n${process.env.NEXT_API_KEY}`);
                 
                 const res = await fetch("/api/file/list", {
                     method: "GET",
                     headers: { 
                         "Content-Type": "application/json", 
-                        "x-api-key": process.env.NEXT_PUBLIC_API_KEY || ""
+                        "x-api-key": process.env.NEXT_API_KEY || ""
                     },
                 });
 
@@ -69,7 +69,7 @@ const FileManager: React.FC<MsgContext> = ({ refreshKey, onError, onSuccess }) =
             method: 'POST',
             headers: { 
                 "Content-Type": "application/json",  
-                "x-api-key": process.env.NEXT_PUBLIC_API_KEY || ""
+                "x-api-key": process.env.NEXT_API_KEY || ""
             },
             body: JSON.stringify({ filename: file }),
         });
@@ -107,7 +107,7 @@ const FileManager: React.FC<MsgContext> = ({ refreshKey, onError, onSuccess }) =
                 method: "DELETE",
                 headers: { 
                     "Content-Type": "application/json",  
-                    "x-api-key": process.env.NEXT_PUBLIC_API_KEY || ""
+                    "x-api-key": process.env.NEXT_API_KEY || ""
                 },
                 body: JSON.stringify({ filename }),
             });
@@ -137,7 +137,7 @@ const FileManager: React.FC<MsgContext> = ({ refreshKey, onError, onSuccess }) =
                 method: "PATCH",
                 headers: { 
                     "Content-Type": "application/json",  
-                    "x-api-key": process.env.NEXT_PUBLIC_API_KEY || ""
+                    "x-api-key": process.env.NEXT_API_KEY || ""
                 },
                 body: JSON.stringify({ oldFilename, newFilename }),
             });
@@ -173,7 +173,7 @@ const FileManager: React.FC<MsgContext> = ({ refreshKey, onError, onSuccess }) =
                 method: "POST",
                 headers: { 
                     "Content-Type": "application/json",  
-                    "x-api-key": process.env.NEXT_PUBLIC_API_KEY || ""
+                    "x-api-key": process.env.NEXT_API_KEY || ""
                 },
                 body: JSON.stringify({ filename: file.name }),
             });
@@ -193,7 +193,7 @@ const FileManager: React.FC<MsgContext> = ({ refreshKey, onError, onSuccess }) =
             const formData = new FormData();
             formData.append("patch", file);
             xhr.open("POST", "/api/file/upload", true);
-            xhr.setRequestHeader("x-api-key", process.env.NEXT_PUBLIC_API_KEY || "");
+            xhr.setRequestHeader("x-api-key", process.env.NEXT_API_KEY || "");
 
             xhr.upload.onprogress = (event) => {
                 if (event.lengthComputable) {
