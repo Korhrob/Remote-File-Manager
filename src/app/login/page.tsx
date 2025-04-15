@@ -4,14 +4,14 @@ import React from "react";
 import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { useMessage } from '../../context/MessageContext'; // Make sure this path is correct
+import { useMessage } from "@/context/MessageContext";
 
 const Home = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const router = useRouter();
-  const { showMessage } = useMessage();
+  const { showError, showSuccess, showNotice } = useMessage();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -22,9 +22,10 @@ const Home = () => {
     });
 
     if (result?.error) {
-      showMessage("Invalid username or password", "error");
+      showError("Invalid username or password");
     } else {
-      router.push("/files"); // Redirect on success
+      showSuccess("Login success");
+      router.push("/files");
     }
   };
 

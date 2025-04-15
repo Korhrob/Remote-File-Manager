@@ -1,7 +1,6 @@
 import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 
-// Define the NextAuth options
 export const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
@@ -18,19 +17,19 @@ export const authOptions: NextAuthOptions = {
           credentials?.username === username &&
           credentials?.password === password
         ) {
-          return { id: "1", name: username }; // Authentication success
+          return { id: "1", name: username };
         }
-        return null; // Authentication failed
+        return null;
       }
     })
   ],
   pages: {
-    signIn: "/login", // Optional: Custom login page
+    signIn: "/login",
   },
   session: {
     strategy: "jwt",
-    maxAge: 60 * 30, // Session expires in 30 minutes (in seconds)
-    updateAge: 60 * 30, // Refresh the session every 30 minutes
+    maxAge: 60 * 30,
+    updateAge: 60 * 30,
   },
-  secret: process.env.NEXTAUTH_SECRET, // Set this in .env
+  secret: process.env.NEXTAUTH_SECRET,
 };
