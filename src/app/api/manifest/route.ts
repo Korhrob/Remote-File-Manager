@@ -5,6 +5,7 @@ import fs from 'fs';
 export async function GET() {
 
 	try {
+		console.log(`manifestPath: ${manifestPath}`);
 		if (!fs.existsSync(manifestPath)) {
 			return NextResponse.json(
 			{ message: `Manifest file does not exist at ${manifestPath}` },

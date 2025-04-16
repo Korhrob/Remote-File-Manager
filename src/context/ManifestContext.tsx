@@ -13,11 +13,10 @@ const ManifestEditor: React.FC<MsgContext> = ({ refreshKey, onError, onSuccess }
     useEffect(() => {
       const fetchManifest = async () => {
         setLoading(true);
-        const res = await fetch("/api/manifest", {
+        const res = await fetch("/api/proxy/manifest", {
           method: "GET",
           headers: { 
               "Content-Type": "application/json", 
-              "x-api-key": process.env.NEXT_PUBLIC_API_KEY || ""
           },
         });
         const data = await res.json();
@@ -43,11 +42,11 @@ const ManifestEditor: React.FC<MsgContext> = ({ refreshKey, onError, onSuccess }
     }, [refreshKey]);
 
     const handleSave = async () => {
-      const response = await fetch('/api/manifest', {
+      const response = await fetch('/api/proxy/manifest', {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
-          "x-api-key": process.env.NEXT_PUBLIC_API_KEY || ""
+          "x-api-key": process.env.NEXT_API_KEY || ""
         },
         body: JSON.stringify({ content: newContent }),
       });

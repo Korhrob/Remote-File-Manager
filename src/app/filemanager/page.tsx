@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useMessage } from '@/context/MessageContext';
 import ManifestEditor from '@/context/ManifestContext';
-import FileManager from '@/context/FileListContext';
+import FileManager from '@/context/FileManagerContext';
 
 const FilesPage = () => {
 
@@ -25,11 +25,11 @@ const FilesPage = () => {
         setUpdateProgress(true);
         showNotice("Fetching and pulling server...");
         try {
-            const res = await fetch("/api/server/update", {
+            const res = await fetch("/api/proxy/server/update", {
                 method: "GET",
                 headers: { 
                     "Content-Type": "application/json", 
-                    "x-api-key": process.env.NEXT_PUBLIC_API_KEY || ""
+                    "x-api-key": process.env.NEXT_API_KEY || ""
                 },
             });
             if (!res.ok) {
