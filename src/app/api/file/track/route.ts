@@ -1,16 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { manifestPath } from '@/config/const';
+import { manifestFile } from '@/config/const';
+import { headers } from 'next/headers';
 import fs from 'fs';
+import path from 'path';
 
 export async function POST(req: NextRequest) {
 
     try {
 
+        const headersList = await headers();
+        const target = headersList.get("x-target") as string;
         const { filename } = await req.json();
 
         if (!filename) {
             return NextResponse.json({ message: 'Filename is required' }, { status: 400 });
         }
+
+        const manifestPath = path.join(target,manifestFile);
+        console.log(`manifestPath: ${manifestPath}`);
+
+        // check that manifest file exists
 
         const manifestData = await fs.promises.readFile(manifestPath, 'utf8');
         const lines = manifestData.split('\n');

@@ -7,15 +7,16 @@ import { headers } from 'next/headers';
 export async function POST(request: NextRequest) {
 
     const headersList = await headers();
+    const target = headersList.get('x-target') as string;
+    
     const formData = await request.formData();
     const fileData = formData.get('data') as File | null;
-    const target = headersList.get('x-target') as string;
 
     if (!fileData) {
         return NextResponse.json({ message: 'No file provided' }, { status: 400 });
     }
 
-    const filePath = path.join(rootPath, target, fileData.name);
+    const filePath = path.join(target, fileData.name);
     console.log(filePath);
 
     try {

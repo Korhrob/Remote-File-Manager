@@ -5,7 +5,7 @@ import { useEffect, useState, useRef } from 'react';
 import { MsgContext } from './MessageContext';
 import type { FileItem } from '@/types/filetype';
 
-const FileManager: React.FC<MsgContext> = ({ refreshKey, onError, onSuccess }) => {
+const FileManager: React.FC<MsgContext> = ({ refreshKey, target, onError, onSuccess }) => {
 
     const [files, setFiles] = useState<FileItem[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
@@ -20,6 +20,7 @@ const FileManager: React.FC<MsgContext> = ({ refreshKey, onError, onSuccess }) =
                     method: "GET",
                     headers: { 
                         "Content-Type": "application/json", 
+                        "x-target": target,
                     },
                 });
 
@@ -59,22 +60,23 @@ const FileManager: React.FC<MsgContext> = ({ refreshKey, onError, onSuccess }) =
         setFiles(prev => prev.map(file => file.name === name ? { ...file, tracked: !file.tracked } : file ));
     };
 
-    const handleTrack = async (file: string) => {
+    const handleTrack = async (filename: string) => {
         try {
         const response = await fetch('/api/proxy/file/track', {
             method: 'POST',
             headers: { 
                 "Content-Type": "application/json",  
+                "x-target": target,
             },
-            body: JSON.stringify({ filename: file }),
+            body: JSON.stringify({ filename }),
         });
 
         const data = await response.json();
         if (data.message) {
 
-            toggleTracked(file);
+            toggleTracked(filename);
             //setRefreshKey(prevKey => prevKey + 1); // fetches list again
-            onSuccess(`File ${file} has been tracked.`);
+            onSuccess(`File ${filename} has been tracked.`);
         } else {
             onError("Failed to track file.");
         }
@@ -101,8 +103,9 @@ const FileManager: React.FC<MsgContext> = ({ refreshKey, onError, onSuccess }) =
                 method: "DELETE",
                 headers: { 
                     "Content-Type": "application/json",  
+                    "x-target": target,
                 },
-                body: JSON.stringify({ target: "patch", filename }),
+                body: JSON.stringify({ filename }),
             });
             
             const data = await res.json();
@@ -126,12 +129,14 @@ const FileManager: React.FC<MsgContext> = ({ refreshKey, onError, onSuccess }) =
             const newFilename = prompt(`Rename "${oldFilename}" to:`);
             if (!newFilename || newFilename.trim() === oldFilename) return;
 
+            console.log(`${oldFilename} -> ${newFilename}`)
             const res = await fetch("/api/proxy/file/rename", {
                 method: "PATCH",
                 headers: { 
-                    "Content-Type": "application/json",  
+                    "Content-Type": "application/json",
+                    "x-target": target,
                 },
-                body: JSON.stringify({ target: "patch", oldFilename, newFilename }),
+                body: JSON.stringify({ oldFilename, newFilename }),
             });
     
             const data = await res.json();
@@ -164,9 +169,10 @@ const FileManager: React.FC<MsgContext> = ({ refreshKey, onError, onSuccess }) =
             const res = await fetch(`/api/proxy/file/exist`, {
                 method: "POST",
                 headers: { 
-                    "Content-Type": "application/json",  
+                    "Content-Type": "application/json",
+                    "x-target": target,
                 },
-                body: JSON.stringify({ target: "patch", filename: file.name }),
+                body: JSON.stringify({ filename: file.name }),
             });
     
             const uploadData = await res.json();
@@ -184,8 +190,7 @@ const FileManager: React.FC<MsgContext> = ({ refreshKey, onError, onSuccess }) =
             const formData = new FormData();
             formData.append("data", file);
             xhr.open("POST", "/api/proxy/file/upload", true);
-            //xhr.setRequestHeader("x-api-key", process.env.NEXT_API_KEY || "");
-            xhr.setRequestHeader("x-target", "patch");
+            xhr.setRequestHeader("x-target", target);
 
             xhr.upload.onprogress = (event) => {
                 if (event.lengthComputable) {
@@ -223,7 +228,7 @@ const FileManager: React.FC<MsgContext> = ({ refreshKey, onError, onSuccess }) =
 	return (
 		<>
 			<h1>Patch Files</h1>
-			<p>{rootPath + "/patch"}</p>
+			<p>{target}</p>
 			
 			<ul className="file-list">
                 {loading && <p>Loading...</p> }

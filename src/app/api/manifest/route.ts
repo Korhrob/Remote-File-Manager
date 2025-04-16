@@ -1,11 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { manifestPath } from '@/config/const';
+import { manifestFile } from '@/config/const';
+import { headers } from 'next/headers';
 import fs from 'fs';
 
 export async function GET() {
 
 	try {
-		console.log(`manifestPath: ${manifestPath}`);
+		const headersList = await headers();
+		const target = headersList.get("x-target") || "";
+		const manifestPath = `${target}`;
+
+		console.log(`manifest GET ${target}`);
+		
 		if (!fs.existsSync(manifestPath)) {
 			return NextResponse.json(
 			{ message: `Manifest file does not exist at ${manifestPath}` },
@@ -27,14 +33,17 @@ export async function GET() {
 	} catch (error) {
 
 		console.error('Error reading manifest file:', error);
-		return NextResponse.json({ message: `Failed to read manifest file ${manifestPath}` }, { status: 500 });
+		return NextResponse.json({ message: `Failed to read manifest file ${manifestFile}` }, { status: 500 });
 
 	}
 }
 
 export async function PATCH(request: NextRequest) {
 	try {
+		const headersList = await headers();
+		const target = headersList.get("x-target") || "";
 		const { content } = await request.json();
+		const manifestPath = `${target}`;
 
 		if (!content) {
 		return NextResponse.json({ message: 'Content is required' }, { status: 400 });

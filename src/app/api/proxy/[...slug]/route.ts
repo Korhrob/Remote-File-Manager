@@ -10,6 +10,14 @@ export async function GET(req: NextRequest, { params }: { params: { slug: string
 	return proxyHandler(req, params);
   }
 
+  export async function PATCH(req: NextRequest, { params }: { params: { slug: string[] } }) {
+	return proxyHandler(req, params);
+  }
+
+  export async function DELETE(req: NextRequest, { params }: { params: { slug: string[] } }) {
+	return proxyHandler(req, params);
+  }
+
 export async function proxyHandler(req: NextRequest, params: { slug: string[] }) {
 	try {
 	  const { slug } = await params;
@@ -23,18 +31,20 @@ export async function proxyHandler(req: NextRequest, params: { slug: string[] })
 	  const apiKey = process.env.NEXT_API_KEY || '';
 	  const endUrl = path.join(req.nextUrl.origin, apiUrl);
 
-	  console.log("req.nextUrl.origin:", req.nextUrl.origin);
-	  console.log("apiUrl:", apiUrl);
-	  console.log(`endUrl: ${endUrl}`);
+	  const body = req.method !== "GET" && req.method !== "HEAD"
+        ? await req.text()
+        : undefined;
 
 	  const response = await fetch(endUrl, {
 		method: req.method,
 		headers: {
 		  "Content-Type": headersList.get("content-type") || "application/json",
 		  "x-api-key": apiKey,
+		  "x-target": headersList.get("x-target") || ""
 		},
-		body: req.method !== "GET" ? JSON.stringify(req.body) : undefined,
+		body,
 	  });
+
   
 	  const data = await response.json();
 	  return NextResponse.json(data, { status: response.status });

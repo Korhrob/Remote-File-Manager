@@ -4,7 +4,7 @@ import { manifestPath } from '@/config/const';
 import { useEffect, useState } from 'react';
 import { MsgContext } from './MessageContext';
 
-const ManifestEditor: React.FC<MsgContext> = ({ refreshKey, onError, onSuccess }) => {
+const ManifestEditor: React.FC<MsgContext> = ({ refreshKey, target, onError, onSuccess }) => {
     const [manifestContent, setManifestContent] = useState('');
     const [isEditing, setIsEditing] = useState(false);
     const [newContent, setNewContent] = useState('');
@@ -13,10 +13,12 @@ const ManifestEditor: React.FC<MsgContext> = ({ refreshKey, onError, onSuccess }
     useEffect(() => {
       const fetchManifest = async () => {
         setLoading(true);
+        console.log(`manifestPath: ${target}`);
         const res = await fetch("/api/proxy/manifest", {
           method: "GET",
           headers: { 
               "Content-Type": "application/json", 
+              "x-target": target,
           },
         });
         const data = await res.json();
@@ -46,7 +48,7 @@ const ManifestEditor: React.FC<MsgContext> = ({ refreshKey, onError, onSuccess }
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
-          "x-api-key": process.env.NEXT_API_KEY || ""
+          "x-target": target
         },
         body: JSON.stringify({ content: newContent }),
       });
