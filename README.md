@@ -3,7 +3,19 @@ A simple web application to manage remote files and edit manifest file for Eluai
 Handles basic login auth, file upload, file rename, file delete, file tracking for the manifest file and manual editing the manifest file.
 
 ## Installation
-Create your .env file in the root folder, also create a 'patch' folder to NEXT_PUBLIC_ROOT location. Example file:
+Ensure nodejs, npm and git are installed.
+```bash
+node -v
+npm -v
+git --version
+```
+
+Clone the repository
+```bash
+git clone git@github.com:Korhrob/Remote-File-Manager.git
+```
+
+Create your .env file inside the repository root, also create a 'patch' folder to NEXT_PUBLIC_ROOT location. Example:
 ```.env
 NEXTAUTH_SECRET=[Secret Key]
 NEXTAUTH_URL=http://localhost:3000
