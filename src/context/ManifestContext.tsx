@@ -3,91 +3,100 @@
 import { manifestPath } from '@/config/const';
 import { useEffect, useState } from 'react';
 import { MsgContext } from './MessageContext';
+import { Manifest } from 'next/dist/lib/metadata/types/manifest-types';
 
-const ManifestEditor: React.FC<MsgContext> = ({ refreshKey, target, onError, onSuccess }) => {
-    const [manifestContent, setManifestContent] = useState('');
-    const [isEditing, setIsEditing] = useState(false);
-    const [newContent, setNewContent] = useState('');
-    const [loading, setLoading] = useState<boolean>(true);
+export type ManifestProps = {
+	refreshKey: number;
+	target: string;
+} & MsgContext;
 
-    useEffect(() => {
-      const fetchManifest = async () => {
-        setLoading(true);
-        console.log(`manifestPath: ${target}`);
-        const res = await fetch("/api/proxy/manifest", {
-          method: "GET",
-          headers: { 
-              "Content-Type": "application/json", 
-              "x-target": target,
-          },
-        });
-        const data = await res.json();
+const ManifestEditor = ({
+	refreshKey,
+	target,
+	onError,
+	onSuccess,
+}: ManifestProps) => {
+	const [manifestContent, setManifestContent] = useState('');
+	const [isEditing, setIsEditing] = useState(false);
+	const [newContent, setNewContent] = useState('');
+	const [loading, setLoading] = useState<boolean>(true);
 
-        if (res.status == 404)
-        {
-          return onError("Failed to load manifest.");
-        }
+	useEffect(() => {
+		const fetchManifest = async () => {
+			setLoading(true);
+			console.log(`manifestPath: ${target}`);
+			const res = await fetch('/api/proxy/manifest', {
+				method: 'GET',
+				headers: {
+					'Content-Type': 'application/json',
+					'x-target': target,
+				},
+			});
+			const data = await res.json();
 
-        if (res.status == 400)
-        {
-          onError("Manifest file is empty");
-          // Don't have to return on empty file
-        }
+			if (res.status == 404) {
+				return onError('Failed to load manifest.');
+			}
 
-        if (data.content) {
-          setManifestContent(data.content);
-          setNewContent(data.content);
-        }
-        setLoading(false);
-      };
-      fetchManifest();
-    }, [refreshKey]);
+			if (res.status == 400) {
+				onError('Manifest file is empty');
+				// Don't have to return on empty file
+			}
 
-    const handleSave = async () => {
-      const response = await fetch('/api/proxy/manifest', {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          "x-target": target
-        },
-        body: JSON.stringify({ content: newContent }),
-      });
+			if (data.content) {
+				setManifestContent(data.content);
+				setNewContent(data.content);
+			}
+			setLoading(false);
+		};
+		fetchManifest();
+	}, [refreshKey]);
 
-      const data = await response.json();
-      if (data.message) {
-        onSuccess('Manifest updated successfully.');
-        setManifestContent(newContent);
-        setIsEditing(false);
-      } else {
-        onError('Failed to update manifest.');
-      }
-    };
+	const handleSave = async () => {
+		const response = await fetch('/api/proxy/manifest', {
+			method: 'PATCH',
+			headers: {
+				'Content-Type': 'application/json',
+				'x-target': target,
+			},
+			body: JSON.stringify({ content: newContent }),
+		});
 
-  return (
-    <div>
-      <h1>Manifest File Editor</h1>
-      <p>{manifestPath}</p>
-      {loading && <p>Loading...</p>}
-      {!isEditing ? (
-        <div>
-          <pre>{manifestContent}</pre>
-          <button onClick={() => setIsEditing(true)}>Edit</button>
-        </div>
-      ) : (
-        <div>
-          <textarea
-            value={newContent}
-            onChange={(e) => setNewContent(e.target.value)}
-            rows={10}
-            cols={50}
-          />
-          <br />
-          <button onClick={handleSave}>Save</button>
-          <button onClick={() => setIsEditing(false)}>Cancel</button>
-        </div>
-      )}
-    </div>
-  );
+		const data = await response.json();
+		if (data.message) {
+			onSuccess('Manifest updated successfully.');
+			setManifestContent(newContent);
+			setIsEditing(false);
+		} else {
+			onError('Failed to update manifest.');
+		}
+	};
+
+	return (
+		<div>
+			<h1>Manifest File Editor</h1>
+			<p>{manifestPath}</p>
+			{loading && <p>Loading...</p>}
+			{!isEditing ? (
+				<div>
+					<pre>{manifestContent}</pre>
+					<button onClick={() => setIsEditing(true)}>Edit</button>
+				</div>
+			) : (
+				<div>
+					<textarea
+						value={newContent}
+						onChange={(e) => setNewContent(e.target.value)}
+						rows={10}
+						cols={50}
+					/>
+					<br />
+					<button onClick={handleSave}>Save</button>
+					<button onClick={() => setIsEditing(false)}>Cancel</button>
+				</div>
+			)}
+		</div>
+	);
 };
 
 export default ManifestEditor;
