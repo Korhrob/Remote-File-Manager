@@ -15,7 +15,7 @@ Clone the repository
 git clone git@github.com:Korhrob/Remote-File-Manager.git
 ```
 
-Create your .env file inside the repository root, also create a 'patch' folder to NEXT_PUBLIC_ROOT location. Example:
+Create your .env file inside the repository root, also create a 'patch' folder to NEXT_PUBLIC_ROOT location and your NEXT_PUBLIC_MANIFEST inside it. Example:
 ```.env
 NEXTAUTH_SECRET=[Secret Key]
 NEXTAUTH_URL=http://localhost:3000
