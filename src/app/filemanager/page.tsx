@@ -5,9 +5,9 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useMessage } from '@/context/MessageContext';
 import ManifestEditor from '@/context/ManifestContext';
-import FileManager from '@/context/FileListContext';
+import FileManager from '@/context/FileManagerContext';
 
-const FilesPage = () => {
+const FileManagerPage = () => {
 
     const { showError, showSuccess, showNotice } = useMessage();
     const { data: session, status } = useSession();
@@ -65,4 +65,4 @@ const FilesPage = () => {
       );
 }
 
-export default FilesPage;
+export default FileManagerPage;

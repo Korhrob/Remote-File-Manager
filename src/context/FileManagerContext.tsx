@@ -1,6 +1,6 @@
 'use client';
 
-import { patchesPath, maxFileSize } from '@/config/const';
+import { rootPath, maxFileSize } from '@/config/const';
 import { useEffect, useState, useRef } from 'react';
 import { MsgContext } from './MessageContext';
 import type { FileItem } from '@/types/filetype';
@@ -8,16 +8,17 @@ import type { FileItem } from '@/types/filetype';
 const FileManager: React.FC<MsgContext> = ({ refreshKey, onError, onSuccess }) => {
 
     const [files, setFiles] = useState<FileItem[]>([]);
-    const [uploadProgress, setUploadProgress] = useState(0);
     const [loading, setLoading] = useState<boolean>(false);
+    const [uploadProgress, setUploadProgress] = useState(0);
 	const fileInputRef = useRef<HTMLInputElement | null>(null);
 
     useEffect(() => {
         const fetchFiles = async () => {
             setLoading(true);
             try {
-                console.log(`PUBLIC_API_KEY:\n${process.env.NEXT_API_KEY}`);
-                
+                if (process.env.NEXT_API_KEY != "")
+                    console.log(`API KEY is set to: '${process.env.NEXT_API_KEY}'`);
+
                 const res = await fetch("/api/file/list", {
                     method: "GET",
                     headers: { 
@@ -107,7 +108,7 @@ const FileManager: React.FC<MsgContext> = ({ refreshKey, onError, onSuccess }) =
                     "Content-Type": "application/json",  
                     "x-api-key": process.env.NEXT_API_KEY || ""
                 },
-                body: JSON.stringify({ filename }),
+                body: JSON.stringify({ target: "patch", filename }),
             });
             
             const data = await res.json();
@@ -137,7 +138,7 @@ const FileManager: React.FC<MsgContext> = ({ refreshKey, onError, onSuccess }) =
                     "Content-Type": "application/json",  
                     "x-api-key": process.env.NEXT_API_KEY || ""
                 },
-                body: JSON.stringify({ oldFilename, newFilename }),
+                body: JSON.stringify({ target: "patch", oldFilename, newFilename }),
             });
     
             const data = await res.json();
@@ -173,7 +174,7 @@ const FileManager: React.FC<MsgContext> = ({ refreshKey, onError, onSuccess }) =
                     "Content-Type": "application/json",  
                     "x-api-key": process.env.NEXT_API_KEY || ""
                 },
-                body: JSON.stringify({ filename: file.name }),
+                body: JSON.stringify({ target: "patch", filename: file.name }),
             });
     
             const uploadData = await res.json();
@@ -189,9 +190,10 @@ const FileManager: React.FC<MsgContext> = ({ refreshKey, onError, onSuccess }) =
 
             const xhr = new XMLHttpRequest();
             const formData = new FormData();
-            formData.append("patch", file);
+            formData.append("data", file);
             xhr.open("POST", "/api/file/upload", true);
             xhr.setRequestHeader("x-api-key", process.env.NEXT_API_KEY || "");
+            xhr.setRequestHeader("x-target", "patch");
 
             xhr.upload.onprogress = (event) => {
                 if (event.lengthComputable) {
@@ -229,7 +231,7 @@ const FileManager: React.FC<MsgContext> = ({ refreshKey, onError, onSuccess }) =
 	return (
 		<>
 			<h1>Patch Files</h1>
-			<p>{patchesPath}</p>
+			<p>{rootPath + "/patch"}</p>
 			
 			<ul className="file-list">
                 {loading && <p>Loading...</p> }

@@ -1,19 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { patchesPath } from '@/config/const';
+import { rootPath } from '@/config/const';
 import fs from 'fs';
 import path from 'path';
 
 export async function PATCH(req: NextRequest) {
     try {
-        const { oldFilename, newFilename } = await req.json();
+        const { target, oldFilename, newFilename } = await req.json();
 
         if (!oldFilename || !newFilename) {
             console.log(`${oldFilename} : ${newFilename}`);
             return NextResponse.json({ message: "Invalid filenames provided." }, { status: 400 });
         }
 
-        const oldFilePath = path.join(patchesPath, oldFilename);
-        const newFilePath = path.join(patchesPath, newFilename);
+        const oldFilePath = path.join(rootPath, target, oldFilename);
+        const newFilePath = path.join(rootPath, target, newFilename);
 
         try {
             await fs.promises.access(oldFilePath);

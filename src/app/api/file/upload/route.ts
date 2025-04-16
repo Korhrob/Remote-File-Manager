@@ -1,18 +1,21 @@
 import fs from 'fs';
 import path from 'path';
 import { NextRequest, NextResponse } from 'next/server';
-import { patchesPath } from '@/config/const';
+import { rootPath } from '@/config/const';
+import { headers } from 'next/headers';
 
 export async function POST(request: NextRequest) {
 
+    const headersList = await headers();
     const formData = await request.formData();
-    const file = formData.get('patch') as File | null;
+    const fileData = formData.get('data') as File | null;
+    const target = headersList.get('x-target') as string;
 
-    if (!file) {
+    if (!fileData) {
         return NextResponse.json({ message: 'No file provided' }, { status: 400 });
     }
 
-    const filePath = path.join(patchesPath, file.name);
+    const filePath = path.join(rootPath, target, fileData.name);
     console.log(filePath);
 
     try {
@@ -24,7 +27,7 @@ export async function POST(request: NextRequest) {
     }
 
     try {
-        const buffer = Buffer.from(await file.arrayBuffer());
+        const buffer = Buffer.from(await fileData.arrayBuffer());
         await fs.promises.writeFile(filePath, buffer);
 
         return NextResponse.json({ message: "File uploaded successfully" }, { status: 200 });

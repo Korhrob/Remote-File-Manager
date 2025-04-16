@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { manifestPath, patchesPath } from '@/config/const';
+import { manifestPath, rootPath } from '@/config/const';
 import type { FileItem } from '@/types/filetype';
 import fs from "fs/promises";
 
 export async function GET(req: NextRequest) {
     try {
 
-        const files = await fs.readdir(patchesPath);
+        const files = await fs.readdir(rootPath);
 
         let manifestEntries: string[] = [];
         try {

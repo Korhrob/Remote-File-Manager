@@ -25,7 +25,7 @@ const Home = () => {
       showError("Invalid username or password");
     } else {
       showSuccess("Login success");
-      router.push("/files");
+      router.push("/filemanager");
     }
   };
 
