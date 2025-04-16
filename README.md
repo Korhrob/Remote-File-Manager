@@ -16,15 +16,15 @@ NEXT_SERVER_PATH=[Local rAthena Repositiory]
 NEXT_PUBLIC_MAXFILESIZE=100
 ```
 
-Run the project in dev mode (or build for production)
+Install depencencies and run the project in dev mode (or build for production)
 ```bash
+npm install
+# or
+yarn install
+
 npm run dev
 # or
 yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
 ## Usage
