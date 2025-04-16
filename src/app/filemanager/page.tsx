@@ -4,10 +4,11 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useMessage } from '@/context/MessageContext';
+import { patchesPath, manifestPath } from '@/config/const';
 import ManifestEditor from '@/context/ManifestContext';
 import FileManager from '@/context/FileManagerContext';
 
-const FilesPage = () => {
+const FileManagerPage = () => {
 
     const { showError, showSuccess, showNotice } = useMessage();
     const { data: session, status } = useSession();
@@ -29,7 +30,6 @@ const FilesPage = () => {
                 method: "GET",
                 headers: { 
                     "Content-Type": "application/json", 
-                    "x-api-key": process.env.NEXT_API_KEY || ""
                 },
             });
             if (!res.ok) {
@@ -48,8 +48,8 @@ const FilesPage = () => {
 
             {session ? (
             <>
-            <FileManager refreshKey={0} onError={(msg) => showError(msg)} onSuccess={(msg) => {showSuccess(msg); setRefreshKey(prev => prev + 1);}}/>
-            <ManifestEditor refreshKey={refreshKey} onError={(msg) => showError(msg)} onSuccess={(msg) => {showSuccess(msg); setRefreshKey(prev => prev + 1);}}/>
+            <FileManager refreshKey={0} target={patchesPath} onError={(msg) => showError(msg)} onSuccess={(msg) => {showSuccess(msg); setRefreshKey(prev => prev + 1);}}/>
+            <ManifestEditor refreshKey={refreshKey} target={manifestPath} onError={(msg) => showError(msg)} onSuccess={(msg) => {showSuccess(msg); setRefreshKey(prev => prev + 1);}}/>
             <div style={{ textAlign: "center", marginTop: "30px" }}>
                 <p>Server Control</p>
                 <button onClick={updateServer} disabled={updateProgress}>Update Server</button>
@@ -65,4 +65,4 @@ const FilesPage = () => {
       );
 }
 
-export default FilesPage;
+export default FileManagerPage;

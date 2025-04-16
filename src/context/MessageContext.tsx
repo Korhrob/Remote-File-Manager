@@ -4,6 +4,7 @@ import React, { createContext, useContext, useState, useRef } from "react";
 
 export interface MsgContext {
 	refreshKey: number;
+  target: string;
 	onError: (message: string) => void;
 	onSuccess: (message: string)  => void;
 }
