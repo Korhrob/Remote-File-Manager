@@ -5,37 +5,43 @@ import { rootPath } from '@/config/const';
 import { headers } from 'next/headers';
 
 export async function POST(request: NextRequest) {
+	const headersList = await headers();
+	const target = headersList.get('x-target') as string;
 
-    const headersList = await headers();
-    const target = headersList.get('x-target') as string;
-    
-    const formData = await request.formData();
-    const fileData = formData.get('data') as File | null;
+	const formData = await request.formData();
+	const fileData = formData.get('data') as File | null;
 
-    if (!fileData) {
-        return NextResponse.json({ message: 'No file provided' }, { status: 400 });
-    }
+	if (!fileData) {
+		return NextResponse.json(
+			{ message: 'No file provided' },
+			{ status: 400 },
+		);
+	}
 
-    const filePath = path.join(target, fileData.name);
-    console.log(filePath);
+	const filePath = path.join(target, fileData.name);
+	console.log(filePath);
 
-    try {
-        await fs.promises.access(filePath, fs.constants.F_OK);
-        return NextResponse.json({ message: "File with this name already exists." }, { status: 400 });
+	try {
+		await fs.promises.access(filePath, fs.constants.F_OK);
+		return NextResponse.json(
+			{ message: 'File with this name already exists.' },
+			{ status: 400 },
+		);
+	} catch (error) {}
 
-    } catch (error) {
+	try {
+		const buffer = Buffer.from(await fileData.arrayBuffer());
+		await fs.promises.writeFile(filePath, buffer);
 
-    }
-
-    try {
-        const buffer = Buffer.from(await fileData.arrayBuffer());
-        await fs.promises.writeFile(filePath, buffer);
-
-        return NextResponse.json({ message: "File uploaded successfully" }, { status: 200 });
-
-    } catch (error) {
-        console.error("Error uploading file:", error);
-        return NextResponse.json({ message: "Error uploading file" }, { status: 500 });
-
-    }
+		return NextResponse.json(
+			{ message: 'File uploaded successfully' },
+			{ status: 200 },
+		);
+	} catch (error) {
+		console.error('Error uploading file:', error);
+		return NextResponse.json(
+			{ message: 'Error uploading file' },
+			{ status: 500 },
+		);
+	}
 }

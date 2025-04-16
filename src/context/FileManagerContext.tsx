@@ -5,274 +5,334 @@ import { useEffect, useState, useRef } from 'react';
 import { MsgContext } from './MessageContext';
 import type { FileItem } from '@/types/filetype';
 
-const FileManager: React.FC<MsgContext> = ({ refreshKey, target, onError, onSuccess }) => {
+export type FileManagerProps = {
+	refreshKey: number;
+	target: string;
+} & MsgContext;
 
-    const [files, setFiles] = useState<FileItem[]>([]);
-    const [loading, setLoading] = useState<boolean>(false);
-    const [uploadProgress, setUploadProgress] = useState(0);
+const FileManager = ({
+	refreshKey,
+	target,
+	onError,
+	onSuccess,
+}: FileManagerProps) => {
+	const [files, setFiles] = useState<FileItem[]>([]);
+	const [loading, setLoading] = useState<boolean>(false);
+	const [uploadProgress, setUploadProgress] = useState(0);
 	const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-    useEffect(() => {
-        const fetchFiles = async () => {
-            setLoading(true);
-            try {
-                const res = await fetch("/api/proxy/file/list", {
-                    method: "GET",
-                    headers: { 
-                        "Content-Type": "application/json", 
-                        "x-target": target,
-                    },
-                });
+	useEffect(() => {
+		const fetchFiles = async () => {
+			setLoading(true);
+			try {
+				const res = await fetch('/api/proxy/file/list', {
+					method: 'GET',
+					headers: {
+						'Content-Type': 'application/json',
+						'x-target': target,
+					},
+				});
 
-                if (!res.ok) {
-                    throw new Error("Failed to fetch files");
-                }
+				if (!res.ok) {
+					throw new Error('Failed to fetch files');
+				}
 
-                const data: FileItem[] = await res.json();
-                setFiles(data);
+				const data: FileItem[] = await res.json();
+				setFiles(data);
 
-                const allFileItems = document.querySelectorAll('.file-item');
-                allFileItems.forEach(item => {
-                    item.classList.add("show");
-                });
+				const allFileItems = document.querySelectorAll('.file-item');
+				allFileItems.forEach((item) => {
+					item.classList.add('show');
+				});
+			} catch (error) {
+				onError('Could not fetch patch files.');
+			}
+			setLoading(false);
+		};
+		fetchFiles();
+	}, [refreshKey]);
 
-            } catch (error) {
-				onError("Could not fetch patch files.");
+	useEffect(() => {
+		setTimeout(() => {
+			const allFileItems = document.querySelectorAll('.file-item');
+			allFileItems.forEach((item) => {
+				item.classList.add('show');
+			});
+		}, 50);
+	}, [files]);
 
-            }
-            setLoading(false);
+	const toggleTracked = (name: string) => {
+		setFiles((prev) =>
+			prev.map((file) =>
+				file.name === name ? { ...file, tracked: !file.tracked } : file,
+			),
+		);
+	};
 
-        };
-        fetchFiles();
+	const handleTrack = async (filename: string) => {
+		try {
+			const response = await fetch('/api/proxy/file/track', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+					'x-target': target,
+				},
+				body: JSON.stringify({ filename }),
+			});
 
-    }, [refreshKey]);
+			const data = await response.json();
+			if (data.message) {
+				toggleTracked(filename);
+				//setRefreshKey(prevKey => prevKey + 1); // fetches list again
+				onSuccess(`File ${filename} has been tracked.`);
+			} else {
+				onError('Failed to track file.');
+			}
+		} catch (error) {
+			onError('Error tracking file.');
+		}
+	};
 
-    useEffect(() => {
-        setTimeout(() => {
-            const allFileItems = document.querySelectorAll('.file-item');
-            allFileItems.forEach(item => {
-                item.classList.add("show");
-            });
-        }, 50);
-    }, [files]);
+	const handleDelete = async (filename: string) => {
+		const confirmDelete = window.confirm(
+			`Are you sure you want to delete the file: ${filename}?`,
+		);
 
-    const toggleTracked = (name: string) => {
-        setFiles(prev => prev.map(file => file.name === name ? { ...file, tracked: !file.tracked } : file ));
-    };
+		if (!confirmDelete) {
+			return;
+		}
 
-    const handleTrack = async (filename: string) => {
-        try {
-        const response = await fetch('/api/proxy/file/track', {
-            method: 'POST',
-            headers: { 
-                "Content-Type": "application/json",  
-                "x-target": target,
-            },
-            body: JSON.stringify({ filename }),
-        });
+		try {
+			const fileItem = document.querySelector(
+				`.file-item[data-file="${filename}"]`,
+			);
+			if (fileItem) {
+				fileItem.classList.remove('show');
+			}
 
-        const data = await response.json();
-        if (data.message) {
+			const res = await fetch(`/api/proxy/file/delete`, {
+				method: 'DELETE',
+				headers: {
+					'Content-Type': 'application/json',
+					'x-target': target,
+				},
+				body: JSON.stringify({ filename }),
+			});
 
-            toggleTracked(filename);
-            //setRefreshKey(prevKey => prevKey + 1); // fetches list again
-            onSuccess(`File ${filename} has been tracked.`);
-        } else {
-            onError("Failed to track file.");
-        }
-        } catch (error) {
-            onError("Error tracking file.");
-        }
-    };
+			const data = await res.json();
 
-    const handleDelete = async (filename: string) => {
+			if (res.ok) {
+				onSuccess(`File deleted successfully: ${filename}`);
+				await new Promise((resolve) => setTimeout(resolve, 300));
+				setFiles((prevFiles) =>
+					prevFiles.filter((file) => file.name !== filename),
+				);
+			} else {
+				onError(`Error: ${data.message}`);
+			}
+		} catch (error) {
+			onError('An error occurred during deletion.');
+		}
+	};
 
-        const confirmDelete = window.confirm(`Are you sure you want to delete the file: ${filename}?`);
+	const handleRename = async (oldFilename: string) => {
+		try {
+			const newFilename = prompt(`Rename "${oldFilename}" to:`);
+			if (!newFilename || newFilename.trim() === oldFilename) return;
 
-        if (!confirmDelete) {
-            return;
-        }
+			console.log(`${oldFilename} -> ${newFilename}`);
+			const res = await fetch('/api/proxy/file/rename', {
+				method: 'PATCH',
+				headers: {
+					'Content-Type': 'application/json',
+					'x-target': target,
+				},
+				body: JSON.stringify({ oldFilename, newFilename }),
+			});
 
-        try {
-            const fileItem = document.querySelector(`.file-item[data-file="${filename}"]`);
-            if (fileItem) {
-                fileItem.classList.remove('show');
-            }
+			const data = await res.json();
+			if (res.ok) {
+				onSuccess(`Renamed "${oldFilename}" to "${newFilename}"`);
+				setFiles((prevFiles) =>
+					prevFiles.map((file) =>
+						file.name === oldFilename
+							? { ...file, name: newFilename }
+							: file,
+					),
+				);
+			} else {
+				onError(`Error: ${data.message}`);
+			}
+		} catch (error) {
+			onError('An error occurred during renaming.');
+		}
+	};
 
-            const res = await fetch(`/api/proxy/file/delete`, {
-                method: "DELETE",
-                headers: { 
-                    "Content-Type": "application/json",  
-                    "x-target": target,
-                },
-                body: JSON.stringify({ filename }),
-            });
-            
-            const data = await res.json();
+	const triggerFileInput = () => {
+		if (fileInputRef.current) {
+			fileInputRef.current.click();
+		}
+	};
 
-            if (res.ok) {
-                onSuccess(`File deleted successfully: ${filename}`);
-                await new Promise(resolve => setTimeout(resolve, 300));
-                setFiles(prevFiles => prevFiles.filter(file => file.name !== filename));
+	const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+		try {
+			const file = e.target.files?.[0];
+			if (!file) {
+				onError('No file selected.');
+				return;
+			}
 
-            } else {
-                onError(`Error: ${data.message}`);
-            }
-        } catch (error) {
-            onError("An error occurred during deletion.");
-        }
-    };
+			const res = await fetch(`/api/proxy/file/exist`, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+					'x-target': target,
+				},
+				body: JSON.stringify({ filename: file.name }),
+			});
 
-    const handleRename = async (oldFilename: string) => {
-        
-        try {
-            const newFilename = prompt(`Rename "${oldFilename}" to:`);
-            if (!newFilename || newFilename.trim() === oldFilename) return;
+			const uploadData = await res.json();
+			if (uploadData.exists) {
+				onError('Error: File already exists');
+				return;
+			}
 
-            console.log(`${oldFilename} -> ${newFilename}`)
-            const res = await fetch("/api/proxy/file/rename", {
-                method: "PATCH",
-                headers: { 
-                    "Content-Type": "application/json",
-                    "x-target": target,
-                },
-                body: JSON.stringify({ oldFilename, newFilename }),
-            });
-    
-            const data = await res.json();
-            if (res.ok) {
-                onSuccess(`Renamed "${oldFilename}" to "${newFilename}"`);
-                setFiles((prevFiles) => prevFiles.map(file => file.name === oldFilename ? { ...file, name: newFilename } : file ));
-            } else {
-                onError(`Error: ${data.message}`);
-            }
-        } catch (error) {
-            onError("An error occurred during renaming.");
-        }
-    };
+			if (file.size > maxFileSize) {
+				onError(
+					`File size is too large! Maximum allowed size is ${maxFileSize} MB.`,
+				);
+				return;
+			}
 
-    const triggerFileInput = () => {
-        if (fileInputRef.current) {
-          fileInputRef.current.click();
-        }
-    };
+			const xhr = new XMLHttpRequest();
+			const formData = new FormData();
+			formData.append('data', file);
+			xhr.open('POST', '/api/proxy/file/upload', true);
+			xhr.setRequestHeader('x-target', target);
 
-    const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+			xhr.upload.onprogress = (event) => {
+				if (event.lengthComputable) {
+					const percentComplete = Math.round(
+						(event.loaded / event.total) * 100,
+					);
+					setUploadProgress(percentComplete);
+				}
+			};
 
-        try {
-            const file = e.target.files?.[0];
-            if (!file) {
-                onError("No file selected.");
-                return;
-            }
-    
-            const res = await fetch(`/api/proxy/file/exist`, {
-                method: "POST",
-                headers: { 
-                    "Content-Type": "application/json",
-                    "x-target": target,
-                },
-                body: JSON.stringify({ filename: file.name }),
-            });
-    
-            const uploadData = await res.json();
-            if (uploadData.exists) {
-                onError("Error: File already exists");
-                return;
-            }
-    
-            if (file.size > maxFileSize) {
-                onError(`File size is too large! Maximum allowed size is ${maxFileSize} MB.`);
-                return;
-            }
+			xhr.onload = () => {
+				console.log('onload trigger');
+				const response = JSON.parse(xhr.response);
+				if (xhr.status === 200) {
+					onSuccess(`File uploaded successfully: ${file.name}`);
+					setFiles((prevFiles) => [
+						...prevFiles,
+						{ name: file.name, tracked: false },
+					]);
+					setUploadProgress(0);
+				} else {
+					console.error(
+						`Something wrong: ${response.message}, ${response.status}`,
+					);
+					onError(`Error: ${response.message}`);
+				}
+			};
 
-            const xhr = new XMLHttpRequest();
-            const formData = new FormData();
-            formData.append("data", file);
-            xhr.open("POST", "/api/proxy/file/upload", true);
-            xhr.setRequestHeader("x-target", target);
+			xhr.onerror = () => {
+				onError(`Error: ${JSON.parse(xhr.response).message}`);
+			};
 
-            xhr.upload.onprogress = (event) => {
-                if (event.lengthComputable) {
-                    const percentComplete = Math.round((event.loaded / event.total) * 100);
-                    setUploadProgress(percentComplete);
-                }
-            };
-    
-            xhr.onload = () => {
-                console.log("onload trigger");
-                const response = JSON.parse(xhr.response);
-                if (xhr.status === 200) {
-                    onSuccess(`File uploaded successfully: ${file.name}`);
-                    setFiles(prevFiles => [...prevFiles, { name: file.name, tracked: false } ]);
-                    setUploadProgress(0);
-                } else {
-                    console.error(`Something wrong: ${response.message}, ${response.status}`);
-                    onError(`Error: ${response.message}`);
-                }
-            };
-            
-            xhr.onerror = () => {
-                onError(`Error: ${JSON.parse(xhr.response).message}`);
-            };
-            
-            xhr.send(formData);
-
-        } catch (error) {
-            onError("An error occurred during file upload.");
-            
-        }
-
-    };
+			xhr.send(formData);
+		} catch (error) {
+			onError('An error occurred during file upload.');
+		}
+	};
 
 	return (
 		<>
 			<h1>Patch Files</h1>
 			<p>{target}</p>
-			
-			<ul className="file-list">
-                {loading && <p>Loading...</p> }
 
-				{files && files.filter(f => f.tracked).map(file => (
-					<li key={file.name} className="file-item tracked" data-file={file.name}>
-						<span>{file.name}</span>
-						<div className="file-actions">
-							<button onClick={() => handleRename(file.name)}>Rename</button>
-							<button className="delete-button" onClick={() => handleDelete(file.name)}>Delete</button>
-						</div>
-					</li>
-				))}
-				{files && files.filter(f => !f.tracked).map(file => (
-					<li key={file.name} className="file-item untracked" data-file={file.name}>
-						<span>{file.name}</span>
-						<div className="file-actions">
-							<button onClick={() => handleTrack(file.name)}>Track</button>
-							<button onClick={() => handleRename(file.name)}>Rename</button>
-							<button className="delete-button" onClick={() => handleDelete(file.name)}>Delete</button>
-						</div>
-					</li>
-				))}
+			<ul className="file-list">
+				{loading && <p>Loading...</p>}
+
+				{files &&
+					files
+						.filter((f) => f.tracked)
+						.map((file) => (
+							<li
+								key={file.name}
+								className="file-item tracked"
+								data-file={file.name}
+							>
+								<span>{file.name}</span>
+								<div className="file-actions">
+									<button
+										onClick={() => handleRename(file.name)}
+									>
+										Rename
+									</button>
+									<button
+										className="delete-button"
+										onClick={() => handleDelete(file.name)}
+									>
+										Delete
+									</button>
+								</div>
+							</li>
+						))}
+				{files &&
+					files
+						.filter((f) => !f.tracked)
+						.map((file) => (
+							<li
+								key={file.name}
+								className="file-item untracked"
+								data-file={file.name}
+							>
+								<span>{file.name}</span>
+								<div className="file-actions">
+									<button
+										onClick={() => handleTrack(file.name)}
+									>
+										Track
+									</button>
+									<button
+										onClick={() => handleRename(file.name)}
+									>
+										Rename
+									</button>
+									<button
+										className="delete-button"
+										onClick={() => handleDelete(file.name)}
+									>
+										Delete
+									</button>
+								</div>
+							</li>
+						))}
 			</ul>
 
-            {uploadProgress > 0 ? 
+			{uploadProgress > 0 ? (
 				<div className="bar-container">
-					<div className="bar-fill" style={{width: `${uploadProgress}%`}}></div>
-					<p className="bar-text">Uploading: {uploadProgress}%</p> 
+					<div
+						className="bar-fill"
+						style={{ width: `${uploadProgress}%` }}
+					></div>
+					<p className="bar-text">Uploading: {uploadProgress}%</p>
 				</div>
-                : 
-                <div style={{ textAlign: "center", marginTop: "30px" }}>
-                    <button onClick={triggerFileInput}>Upload New File</button>
-                    <input
-                    type="file"
-                    ref={fileInputRef}
-                    onChange={handleUpload}
-                    className="upload-input"
-                    />
-                </div>
-            }
+			) : (
+				<div style={{ textAlign: 'center', marginTop: '30px' }}>
+					<button onClick={triggerFileInput}>Upload New File</button>
+					<input
+						type="file"
+						ref={fileInputRef}
+						onChange={handleUpload}
+						className="upload-input"
+					/>
+				</div>
+			)}
 		</>
 	);
-
 };
 
 export default FileManager;

@@ -5,40 +5,45 @@ import fs from 'fs';
 import path from 'path';
 
 export async function POST(req: NextRequest) {
+	try {
+		const headersList = await headers();
+		const target = headersList.get('x-target') as string;
+		const { filename } = await req.json();
 
-    try {
+		if (!filename) {
+			return NextResponse.json(
+				{ message: 'Filename is required' },
+				{ status: 400 },
+			);
+		}
 
-        const headersList = await headers();
-        const target = headersList.get("x-target") as string;
-        const { filename } = await req.json();
+		const manifestPath = path.join(target, manifestFile);
+		console.log(`manifestPath: ${manifestPath}`);
 
-        if (!filename) {
-            return NextResponse.json({ message: 'Filename is required' }, { status: 400 });
-        }
+		// check that manifest file exists
 
-        const manifestPath = path.join(target,manifestFile);
-        console.log(`manifestPath: ${manifestPath}`);
+		const manifestData = await fs.promises.readFile(manifestPath, 'utf8');
+		const lines = manifestData.split('\n');
 
-        // check that manifest file exists
+		const lastLine = lines[lines.length - 1].trim();
+		const lastIndex = lastLine ? parseInt(lastLine.split(' ')[0], 10) : 0;
+		const newIndex = isNaN(lastIndex) ? 1 : lastIndex + 1;
 
-        const manifestData = await fs.promises.readFile(manifestPath, 'utf8');
-        const lines = manifestData.split('\n');
+		const newEntry = `${newIndex} ${filename}`;
+		lines.push(newEntry);
+		const updatedManifest = lines.join('\n');
 
-        const lastLine = lines[lines.length - 1].trim();
-        const lastIndex = lastLine ? parseInt(lastLine.split(' ')[0], 10) : 0;
-        const newIndex = isNaN(lastIndex) ? 1 : lastIndex + 1;
+		await fs.promises.writeFile(manifestPath, updatedManifest, 'utf8');
 
-        const newEntry = `${newIndex} ${filename}`;
-        lines.push(newEntry);
-        const updatedManifest = lines.join('\n');
-
-        await fs.promises.writeFile(manifestPath, updatedManifest, 'utf8');
-
-        return NextResponse.json({ message: 'File tracked successfully' }, { status: 200 });
-
-    } catch (error) {
-        console.error('Error tracking file:', error);
-        return NextResponse.json({ message: 'Failed to track file' }, { status: 500 });
-
-    }
+		return NextResponse.json(
+			{ message: 'File tracked successfully' },
+			{ status: 200 },
+		);
+	} catch (error) {
+		console.error('Error tracking file:', error);
+		return NextResponse.json(
+			{ message: 'Failed to track file' },
+			{ status: 500 },
+		);
+	}
 }
