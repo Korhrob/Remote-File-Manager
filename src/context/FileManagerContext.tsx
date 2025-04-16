@@ -16,14 +16,10 @@ const FileManager: React.FC<MsgContext> = ({ refreshKey, onError, onSuccess }) =
         const fetchFiles = async () => {
             setLoading(true);
             try {
-                if (process.env.NEXT_API_KEY != "")
-                    console.log(`API KEY is set to: '${process.env.NEXT_API_KEY}'`);
-
-                const res = await fetch("/api/file/list", {
+                const res = await fetch("/api/proxy/file/list", {
                     method: "GET",
                     headers: { 
                         "Content-Type": "application/json", 
-                        "x-api-key": process.env.NEXT_API_KEY || ""
                     },
                 });
 
@@ -65,11 +61,10 @@ const FileManager: React.FC<MsgContext> = ({ refreshKey, onError, onSuccess }) =
 
     const handleTrack = async (file: string) => {
         try {
-        const response = await fetch('/api/file/track', {
+        const response = await fetch('/api/proxy/file/track', {
             method: 'POST',
             headers: { 
                 "Content-Type": "application/json",  
-                "x-api-key": process.env.NEXT_API_KEY || ""
             },
             body: JSON.stringify({ filename: file }),
         });
@@ -102,11 +97,10 @@ const FileManager: React.FC<MsgContext> = ({ refreshKey, onError, onSuccess }) =
                 fileItem.classList.remove('show');
             }
 
-            const res = await fetch(`/api/file/delete`, {
+            const res = await fetch(`/api/proxy/file/delete`, {
                 method: "DELETE",
                 headers: { 
                     "Content-Type": "application/json",  
-                    "x-api-key": process.env.NEXT_API_KEY || ""
                 },
                 body: JSON.stringify({ target: "patch", filename }),
             });
@@ -132,11 +126,10 @@ const FileManager: React.FC<MsgContext> = ({ refreshKey, onError, onSuccess }) =
             const newFilename = prompt(`Rename "${oldFilename}" to:`);
             if (!newFilename || newFilename.trim() === oldFilename) return;
 
-            const res = await fetch("/api/file/rename", {
+            const res = await fetch("/api/proxy/file/rename", {
                 method: "PATCH",
                 headers: { 
                     "Content-Type": "application/json",  
-                    "x-api-key": process.env.NEXT_API_KEY || ""
                 },
                 body: JSON.stringify({ target: "patch", oldFilename, newFilename }),
             });
@@ -168,11 +161,10 @@ const FileManager: React.FC<MsgContext> = ({ refreshKey, onError, onSuccess }) =
                 return;
             }
     
-            const res = await fetch(`/api/file/exist`, {
+            const res = await fetch(`/api/proxy/file/exist`, {
                 method: "POST",
                 headers: { 
                     "Content-Type": "application/json",  
-                    "x-api-key": process.env.NEXT_API_KEY || ""
                 },
                 body: JSON.stringify({ target: "patch", filename: file.name }),
             });
@@ -191,8 +183,8 @@ const FileManager: React.FC<MsgContext> = ({ refreshKey, onError, onSuccess }) =
             const xhr = new XMLHttpRequest();
             const formData = new FormData();
             formData.append("data", file);
-            xhr.open("POST", "/api/file/upload", true);
-            xhr.setRequestHeader("x-api-key", process.env.NEXT_API_KEY || "");
+            xhr.open("POST", "/api/proxy/file/upload", true);
+            //xhr.setRequestHeader("x-api-key", process.env.NEXT_API_KEY || "");
             xhr.setRequestHeader("x-target", "patch");
 
             xhr.upload.onprogress = (event) => {

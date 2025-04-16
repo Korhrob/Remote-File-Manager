@@ -1,9 +1,9 @@
+import { exportTraceState } from 'next/dist/trace';
 import path from 'path';
 
-export const rootPath = path.join(process.env.NEXT_PUBLIC_ROOT || './temp');
-export const patchPath = path.join(rootPath, 'patch');
-export const manifestPath = path.join(rootPath, process.env.NEXT_PUBLIC_MANIFEST || 'manifest.txt');
-
+export const rootPath = process.env.NEXT_PUBLIC_ROOT || './temp';
+export const patchesPath = path.join(rootPath, 'patch');
+export const manifestPath = path.join(patchesPath, process.env.NEXT_PUBLIC_MANIFEST || 'manifest.txt');
 export const serverPath = path.join(process.env.NEXT_PUBLIC_SERVER_PATH || '');
 export const dbPath = path.join(serverPath, process.env.NEXT_PUBLIC_DB_PATH || '');
 

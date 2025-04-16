@@ -25,7 +25,7 @@ const FileManagerPage = () => {
         setUpdateProgress(true);
         showNotice("Fetching and pulling server...");
         try {
-            const res = await fetch("/api/server/update", {
+            const res = await fetch("/api/proxy/server/update", {
                 method: "GET",
                 headers: { 
                     "Content-Type": "application/json", 

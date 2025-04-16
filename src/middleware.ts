@@ -6,7 +6,7 @@ export default async function validateApiKey(req: NextRequest) {
   const apiKey = headersList.get('x-api-key');
   
   if (apiKey !== process.env.NEXT_API_KEY) {
-    console.log(`Unauthorized - invalid API key: '${apiKey}'`);
+    console.log("invalid API key");
     return NextResponse.json({ message: "Unauthorized - invalid API key" }, { status: 401 });
   }
 
