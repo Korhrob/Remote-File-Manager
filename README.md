@@ -7,7 +7,7 @@ Create your .env file in the project repo. Example file:
 ```.env
 NEXTAUTH_SECRET=[Secret Key]
 NEXTAUTH_URL=http://localhost:3000
-NEXT_API_KEY=[Secret Api Key]
+NEXT_PUBLIC_API_KEY=[Secret Api Key]
 DUMMY_USER_USERNAME=admin
 DUMMY_USER_PASSWORD=passoword
 NEXT_PUBLIC_ROOT=/var/www/html
