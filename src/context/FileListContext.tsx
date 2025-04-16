@@ -56,9 +56,8 @@ const FileManager: React.FC<MsgContext> = ({ refreshKey, onError, onSuccess }) =
                 item.classList.add("show");
             });
         }, 50);
-    }, [files]); // Runs every time the `files` state changes (i.e., when a file is added)
+    }, [files]);
 
-    // switch tracked state
     const toggleTracked = (name: string) => {
         setFiles(prev => prev.map(file => file.name === name ? { ...file, tracked: !file.tracked } : file ));
     };
@@ -78,7 +77,6 @@ const FileManager: React.FC<MsgContext> = ({ refreshKey, onError, onSuccess }) =
         if (data.message) {
 
             toggleTracked(file);
-
             //setRefreshKey(prevKey => prevKey + 1); // fetches list again
             onSuccess(`File ${file} has been tracked.`);
         } else {

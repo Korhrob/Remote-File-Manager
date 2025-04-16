@@ -8,7 +8,6 @@ export interface MsgContext {
 	onSuccess: (message: string)  => void;
 }
 
-// Define the types for the context
 interface MessageContextType {
   showMessage: (msg: string, type: "success" | "error" | "notice") => void;
   showError: (msg: string) => void;
@@ -19,10 +18,8 @@ interface MessageContextType {
   visible: boolean;
 }
 
-// Create the context
 const MessageContext = createContext<MessageContextType | null>(null);
 
-// Custom hook to access the message context
 export const useMessage = () => {
   const context = useContext(MessageContext);
   if (!context) {
@@ -31,7 +28,6 @@ export const useMessage = () => {
   return context;
 };
 
-// MessageProvider component that encapsulates message state
 export const MessageProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [message, setMessage] = useState<string | null>(null);
   const [messageType, setMessageType] = useState<"success" | "error" | "notice" | null>(null);
@@ -52,12 +48,12 @@ export const MessageProvider: React.FC<{ children: React.ReactNode }> = ({ child
     }, 10);
 
     timeoutRef.current = setTimeout(() => {
-      setVisible(false); // Start fade-out
+      setVisible(false);
       hideTimeoutRef.current = setTimeout(() => {
-        setMessage(null); // Remove after animation
+        setMessage(null);
         setMessageType(null);
-      }, 400); // Match transition duration
-    }, 3600); // Hide after 4 seconds
+      }, 400);
+    }, 3600);
   };
 
   // Helper methods
