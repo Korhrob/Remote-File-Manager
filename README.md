@@ -3,7 +3,7 @@ A simple web application to manage remote files and edit manifest file for Eluai
 Handles basic login auth, file upload, file rename, file delete, file tracking for the manifest file and manual editing the manifest file.
 
 ## Installation
-Create your .env file in the project repo. Example file:
+Create your .env file in the root folder, also create a 'patch' folder to NEXT_PUBLIC_ROOT location. Example file:
 ```.env
 NEXTAUTH_SECRET=[Secret Key]
 NEXTAUTH_URL=http://localhost:3000
