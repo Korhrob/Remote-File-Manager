@@ -21,6 +21,7 @@ NEXTAUTH_SECRET=[Secret Key]
 NEXTAUTH_URL=http://localhost:3000
 
 # NOTE; for demo purposes we are exposing the public API key
+# dont do this for a public project
 NEXT_PUBLIC_API_KEY=[Secret Api Key] 
 
 DUMMY_USER_USERNAME=admin
