@@ -20,7 +20,7 @@ Create your .env file inside the repository root, also create a 'patch' folder t
 NEXTAUTH_SECRET=[Secret Key]
 NEXTAUTH_URL=http://localhost:3000
 
-NOTE; for demo purposes we are exposing the public API key
+# NOTE; for demo purposes we are exposing the public API key
 NEXT_PUBLIC_API_KEY=[Secret Api Key] 
 
 DUMMY_USER_USERNAME=admin
