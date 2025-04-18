@@ -7,6 +7,10 @@ import { useRouter } from 'next/navigation';
 import { useMessage } from '@/context/MessageContext';
 import { useSession } from 'next-auth/react';
 
+import ReCAPTCHA from 'react-google-recaptcha';
+const SITE_KEY = "6LeriuYSAAAAAHVS9tbgpyHLTMY2HyQyZ8EAaixz";
+
+
 const signin = () => {
 	const [username, setUsername] = useState('');
 	const [password, setPassword] = useState('');
@@ -15,11 +19,12 @@ const signin = () => {
 	const router = useRouter();
 	const { data: session, status } = useSession();
 
-	const navigateToPage = () => {
-		router.push('signup');
-	};
-
+	const [showCaptcha, setCaptcha] = useState(false);
+	const [recaptchaToken, setRecaptchaToken] = useState<string | null>(null);
+	
 	useEffect(() => {
+		setCaptcha(false);
+		setRecaptchaToken(null);
 		if (status === 'authenticated') {
 			router.push('/filemanager');
 		}
@@ -27,6 +32,14 @@ const signin = () => {
 
 	const handleLogin = async (e: React.FormEvent) => {
 		e.preventDefault();
+
+		if (!recaptchaToken)
+		{
+			console.log("missing captcha token");
+			setCaptcha(true);
+			return;
+		}
+
 		const result = await signIn('credentials', {
 			username,
 			password,
@@ -41,14 +54,16 @@ const signin = () => {
 		}
 	};
 
-	const handleCaptcha = () => {
-		console.log("sad");
+	const handleCaptchaChange = (token: string | null) => {
+		setRecaptchaToken(token); // Set reCAPTCHA token when completed
+		console.log("complete");
 	};
 
+	
 	return (
 		<div>
-			<h1>Login</h1>
-			{/*<form onSubmit={handleLogin} className="login-form">*/}
+			<h1>Sign in</h1>
+			<form onSubmit={handleLogin} className="login-form">
 				<label htmlFor="username">Username</label>
 				<input
 					id="username"
@@ -65,8 +80,15 @@ const signin = () => {
 					value={password}
 					onChange={(e) => setPassword(e.target.value)}
 				/>
-				{/*<button type="submit">Login</button>*/}
-			{/*</form>*/}
+				{ showCaptcha && 
+				<>
+					<div className="recaptcha-container">
+					<ReCAPTCHA sitekey={SITE_KEY} onChange={handleCaptchaChange}/>
+					</div>
+				</>
+				}
+				<button type="submit">Login</button>
+			</form>
 		</div>
 	);
 };
