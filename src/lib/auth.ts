@@ -24,7 +24,7 @@ export const authOptions: NextAuthOptions = {
 		}),
 	],
 	pages: {
-		signIn: '/login/page1',
+		signIn: '/login',
 	},
 	session: {
 		strategy: 'jwt',
@@ -32,4 +32,5 @@ export const authOptions: NextAuthOptions = {
 		updateAge: 60 * 30,
 	},
 	secret: process.env.NEXTAUTH_SECRET,
+	
 };
