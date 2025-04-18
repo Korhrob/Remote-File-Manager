@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { SessionProvider } from 'next-auth/react';
-import { MessageProvider, useMessage } from '../context/MessageContext';
+import { MessageProvider, useMessage } from '@/context/MessageContext';
 import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
 
